@@ -98,7 +98,7 @@ export default function Portfolio() {
             DART + C + JS + TS + PYTHON + GLSL
           </div>
           <p className="text-xl text-[#a0a0a0] mb-12 leading-relaxed">
-            Mobile app developer crafting cutting-edge solutions.<br />
+            Software developer crafting cutting-edge solutions.<br />
             Passionate about creating user-centric applications that elevate experiences.
           </p>
           <div className="flex gap-4 justify-center">
