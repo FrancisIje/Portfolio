@@ -1,4 +1,6 @@
 {
+  "name": "francis-portfolio",
+  "version": "1.0.0",
   "type": "module",
   "dependencies": {
     "lucide-react": "^0.268.0",
