@@ -251,7 +251,10 @@ export default function Portfolio() {
         <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-[#2a2a2a]">
           <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="text-xl font-semibold tracking-tight">Francis Ije</div>
+              <div className="text-xl font-semibold tracking-tight">
+                <span className="md:hidden">FI</span>
+                <span className="hidden md:inline">Francis Ije</span>
+              </div>
               <div className="flex gap-8">
                 {['home', 'about', 'projects', 'skills', 'contact'].map((section) => (
                   <button
