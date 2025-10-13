@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Minimal reset and background handling so canvas covers full screen */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: #0a0a0a;
+  color: white;
+  font-family: "Claude", Charter, system-ui, -apple-system, sans-serif;
+}
+
+/* Utility to ensure fixed full-screen canvas doesn't block content */
+canvas { display: block; }
