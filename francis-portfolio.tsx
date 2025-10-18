@@ -709,7 +709,7 @@ export default function Portfolio() {
           }
         });
       },
-      { threshold: 0.15, rootMargin: '-80px' }
+      { threshold: 0.1, rootMargin: '0px' }
     );
 
     if (aboutRef.current) {
