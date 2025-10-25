@@ -900,10 +900,9 @@ export default function Portfolio() {
     "Dart", "JavaScript", "Python", "Go", "C",
     "Flutter", "React Native", "React", "Node.js",
     "PostgreSQL", "MongoDB", "WebSockets", "REST APIs",
-    "AWS", "Firebase", "Vercel", "Azure Storage",
+    "AWS", "Firebase", "Azure",
     "Mobile Development", "Web Development", "Full-Stack",
-    "WebGL", "GLSL Shaders", "UI/UX Design",
-    "iOS Development", "Android Development", "CI/CD"
+    "WebGL", "GLSL", "CI/CD"
   ];
 
   return (
@@ -915,7 +914,7 @@ export default function Portfolio() {
         <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/50 border-b border-white/10">
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="text-lg font-semibold tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>FrancisIje</div>
+              {/* <div className="text-lg font-semibold tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>FrancisIje</div> */}
               <img src="/favicon.svg" alt="FI" className="h-6 w-6" />
             </div>
             <div className="hidden md:flex items-center gap-8">
