@@ -727,7 +727,7 @@ export default function Portfolio() {
 
     // Track active section
     const handleScroll = () => {
-      const sections = ['home', 'about', 'work', 'contact'];
+      const sections = ['home', 'work', 'about', 'contact'];
       const current = sections.find(section => {
         const element = document.getElementById(section);
         if (element) {
@@ -748,26 +748,53 @@ export default function Portfolio() {
 
   const mobileProjects = [
     {
-      title: "Meditation App",
-      description: "A user-centric mobile application designed to enhance mindfulness and meditation practices.",
-      tech: ["Flutter", "Dart", "Firebase"],
+      title: "Bookaleap",
+      description: "Easily find and book top personal trainers, nutrition coaches, physiotherapists, and more wellness professionals with just a few clicks.",
+      tech: ["Flutter", "Dart", "Firebase", "REST APIs"],
       link: "#",
-      year: "2024"
+      year: "2024",
+      isLive: true,
+      image: "/bookaleap.png",
+      appStoreLink: "https://apps.apple.com/tr/app/bookaleap/id6447549852?platform=iphone",
+      playStoreLink: "https://play.google.com/store/apps/details?id=com.vebbuilders.bookleap&hl=en_US"
     },
     {
-      title: "Cross-Platform Mobile",
-      description: "Robust iOS and Android applications with seamless performance and native experiences.",
-      tech: ["React Native", "JavaScript", "REST APIs"],
-      link: "#",
-      year: "2024"
+      title: "Deeply Dating App",
+      description: "A full-featured mobile dating application with real-time messaging, profile matching, and media storage capabilities.",
+      tech: ["Flutter", "WebSockets", "Node.js", "MongoDB", "Azure Storage"],
+      link: "https://drive.google.com/file/d/1RwmrTLIgRK6eUPNO9wGL_7vjRrexRFFJ/view",
+      year: "2024",
+      image: "/dating-app.png"
     },
     {
-      title: "Native Mobile Solution",
-      description: "High-performance native applications with smooth animations and optimized resources.",
-      tech: ["Flutter", "Dart", "SQLite"],
-      link: "#",
-      year: "2023"
-    }
+      title: "SpeakUp",
+      description: "An AI-powered language coach using ChatGPT API with voice recording, transcribing, and pronunciation assessment features to help users improve their language skills.",
+      tech: ["Flutter", "ChatGPT API", "Firebase", "Speech Recognition", "AI/ML"],
+      link: "https://drive.google.com/file/d/13bxZW8b5wFYTXoJLsIQQJRh-1YZa2dvT/view",
+      year: "2024",
+      image: "/speakup banner.png"
+    },
+    // {
+    //   title: "Meditation App",
+    //   description: "A user-centric mobile application designed to enhance mindfulness and meditation practices.",
+    //   tech: ["Flutter", "Dart", "Firebase"],
+    //   link: "#",
+    //   year: "2024"
+    // },
+    // {
+    //   title: "Cross-Platform Mobile",
+    //   description: "Robust iOS and Android applications with seamless performance and native experiences.",
+    //   tech: ["React Native", "JavaScript", "REST APIs"],
+    //   link: "#",
+    //   year: "2024"
+    // },
+    // {
+    //   title: "Native Mobile Solution",
+    //   description: "High-performance native applications with smooth animations and optimized resources.",
+    //   tech: ["Flutter", "Dart", "SQLite"],
+    //   link: "#",
+    //   year: "2023"
+    // }
   ];
 
   const webGLSLProjects = [
@@ -795,9 +822,13 @@ export default function Portfolio() {
   ];
 
   const skills = [
-    "Dart", "JavaScript", "Python", "C", 
-    "Flutter", "React Native", "React", "WebGL",
-    "Mobile Development", "GLSL Shaders", "UI/UX"
+    "Dart", "JavaScript", "Python", "Go", "C",
+    "Flutter", "React Native", "React", "Node.js",
+    "PostgreSQL", "MongoDB", "WebSockets", "REST APIs",
+    "AWS", "Firebase", "Vercel", "Azure Storage",
+    "Mobile Development", "Web Development", "Full-Stack",
+    "WebGL", "GLSL Shaders", "UI/UX Design",
+    "iOS Development", "Android Development", "CI/CD"
   ];
 
   return (
@@ -814,13 +845,13 @@ export default function Portfolio() {
                  className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'home' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
                 Home
               </a>
-              <a href="#about" 
-                 className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'about' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
-                About
-              </a>
               <a href="#work" 
                  className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'work' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
                 Work
+              </a>
+              <a href="#about" 
+                 className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'about' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
+                About
               </a>
               <a href="#contact" 
                  className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'contact' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
@@ -832,11 +863,11 @@ export default function Portfolio() {
                  className="hover:opacity-70 transition-opacity">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="mailto:contact@francis.dev" 
+              <a href="mailto:ijenebefrancis@gmail.com" 
                  className="hover:opacity-70 transition-opacity">
                 <Mail className="w-5 h-5" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.linkedin.com/in/francis-ijenebe/" target="_blank" rel="noopener noreferrer"
                  className="hover:opacity-70 transition-opacity">
                 <Linkedin className="w-5 h-5" />
               </a>
@@ -851,61 +882,13 @@ export default function Portfolio() {
               Francis Ijenebe
             </h1>
             <div className="text-xl md:text-2xl text-white/60 mb-8 tracking-wider" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-              Mobile Developer • Creative Coder
+              Software Developer • Mobile & Web
             </div>
             <p className="text-center text-base md:text-lg text-white/70 max-w-xl mx-auto leading-relaxed">
-              Building mobile experiences and shader-driven visuals that blend art with utility
+              Crafting scalable, robust and maintainable software solutions for mobile and web platforms.
             </p>
           </div>
-        </section>
-
-        {/* About Section */}
-        <section id="about" ref={aboutRef} className="section-animate min-h-screen flex items-center px-6 md:px-12 py-24">
-          <div className="max-w-7xl mx-auto w-full">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="stagger-item">
-                <span className="text-sm uppercase tracking-widest text-white/60 mb-6 block">About</span>
-                <h2 className="text-4xl md:text-6xl font-semibold mb-8 tracking-tight leading-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-                  Building experiences that matter
-                </h2>
-              </div>
-              <div className="space-y-6 text-lg text-white/80 leading-relaxed">
-                <p className="stagger-item">
-                  Passionate mobile app developer with proven expertise in iOS and Android development. 
-                  I excel in crafting user-centric applications through thoughtful design and robust engineering.
-                </p>
-                <p className="stagger-item">
-                  My work blends clarity, consistency, and creative performance — from mobile apps to 
-                  shader-based visuals, I build experiences that connect and evolve.
-                </p>
-                <p className="stagger-item">
-                  Known for collaborative spirit, tech enthusiasm, and commitment to continuous learning. 
-                  Always exploring new technologies and pushing boundaries.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Capabilities */}
-        <section ref={capabilitiesRef} className="section-animate py-24 px-6 md:px-12 border-y border-white/10">
-          <div className="max-w-7xl mx-auto">
-            <div className="stagger-item">
-              <span className="text-sm uppercase tracking-widest text-white/60 mb-8 block">Capabilities</span>
-              <h2 className="text-3xl md:text-5xl font-semibold mb-12 tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-                Skills honed through passion and dedication
-              </h2>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {skills.map((skill, idx) => (
-                <div key={idx} 
-                     className="stagger-item px-6 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 transition-all">
-                  <span className="text-sm uppercase tracking-wider">{skill}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        </section> 
 
         {/* Projects Section */}
         <section id="work" ref={workRef} className="section-animate py-24 px-6 md:px-12">
@@ -922,26 +905,78 @@ export default function Portfolio() {
               </div>
               <div className="space-y-4">
                 {mobileProjects.map((project, idx) => (
-                  <a key={idx} href={project.link} 
+                  <div key={idx} 
                      className="stagger-item group block p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+                    {project.image && (
+                      <div className="mb-6 overflow-hidden rounded-xl bg-white/5 flex items-center justify-center p-4">
+                        <img 
+                          src={project.image} 
+                          alt={project.title}
+                          className="max-w-full max-h-96 object-contain group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-4 mb-2">
                           <h4 className="text-2xl font-bold">{project.title}</h4>
+                          {project.isLive && (
+                            <span className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
+                              LIVE
+                            </span>
+                          )}
                           <span className="text-sm text-white/50">{project.year}</span>
                         </div>
                         <p className="text-white/70 leading-relaxed mb-4">{project.description}</p>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 mb-4">
                           {project.tech.map((tech, i) => (
                             <span key={i} className="text-xs px-3 py-1 bg-black/60 border border-white/10 rounded-full text-white/60">
                               {tech}
                             </span>
                           ))}
                         </div>
+                        {(project.appStoreLink || project.playStoreLink) && (
+                          <div className="flex gap-3 mt-4">
+                            {project.appStoreLink && (
+                              <a 
+                                href={project.appStoreLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 transition-all flex items-center gap-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <span>App Store</span>
+                                <ArrowUpRight className="w-3 h-3" />
+                              </a>
+                            )}
+                            {project.playStoreLink && (
+                              <a 
+                                href={project.playStoreLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 transition-all flex items-center gap-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <span>Play Store</span>
+                                <ArrowUpRight className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
+                        )}
+                        {project.link && !project.appStoreLink && !project.playStoreLink && project.link !== "#" && (
+                          <a 
+                            href={project.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white mt-4 transition-colors"
+                          >
+                            <span>View Project</span>
+                            <ArrowUpRight className="w-4 h-4" />
+                          </a>
+                        )}
                       </div>
-                      <ArrowUpRight className="w-6 h-6 text-white/40 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
                     </div>
-                  </a>
+                  </div>
                 ))}
               </div>
             </div>
@@ -980,16 +1015,64 @@ export default function Portfolio() {
           </div>
         </section>
 
+        {/* About Section */}
+        <section id="about" ref={aboutRef} className="section-animate min-h-screen flex items-center px-6 md:px-12 py-24">
+          <div className="max-w-7xl mx-auto w-full">
+            <div className="grid md:grid-cols-2 gap-16 items-center">
+              <div className="stagger-item">
+                <span className="text-sm uppercase tracking-widest text-white/60 mb-6 block">About</span>
+                <h2 className="text-4xl md:text-6xl font-semibold mb-8 tracking-tight leading-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
+                  Building software that solves real problems
+                </h2>
+              </div>
+              <div className="space-y-6 text-lg text-white/80 leading-relaxed">
+                <p className="stagger-item">
+                  I'm a software developer who builds and ships apps for both mobile and web. I create smooth user interfaces with Flutter and React, and I handle the backend too—using whatever fits best, whether that's Node.js, Dart, Python, or Go.
+                </p>
+                <p className="stagger-item">
+                  I work with all sorts of databases, from SQL options like PostgreSQL to NoSQL ones like MongoDB, and I love adding real-time features with WebSockets.
+                </p>
+                <p className="stagger-item">
+                  Plus, I don't just build apps—I get them out into the world. I've published mobile apps on the Apple App Store and Google Play Store, and I deploy web apps using platforms like AWS, Firebase, and Vercel.
+                </p>
+                <p className="stagger-item">
+                  Passionate about continuous learning and staying current with industry best practices. I thrive in collaborative environments and enjoy tackling complex technical challenges.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Capabilities */}
+        <section ref={capabilitiesRef} className="section-animate py-24 px-6 md:px-12 border-y border-white/10">
+          <div className="max-w-7xl mx-auto">
+            <div className="stagger-item">
+              <span className="text-sm uppercase tracking-widest text-white/60 mb-8 block">Capabilities</span>
+              <h2 className="text-3xl md:text-5xl font-semibold mb-12 tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
+                Technical skills and expertise
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {skills.map((skill, idx) => (
+                <div key={idx} 
+                     className="stagger-item px-6 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 transition-all">
+                  <span className="text-sm uppercase tracking-wider">{skill}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Contact CTA */}
         <section id="contact" ref={contactRef} className="section-animate py-32 px-6 md:px-12 border-t border-white/10">
           <div className="max-w-7xl mx-auto text-center">
             <h2 className="stagger-item text-4xl md:text-6xl lg:text-7xl font-semibold mb-8 tracking-tight leading-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-              Let's build something<br />remarkable together
+              Let's work on your<br />next project together
             </h2>
             <p className="stagger-item text-xl text-white/70 mb-12 max-w-2xl mx-auto">
-              Interested in collaborating or just want to connect? I'm always open to new opportunities and conversations.
+              Open to new opportunities and collaborations. Let's discuss how I can contribute to your team or project.
             </p>
-            <a href="mailto:contact@francis.dev" 
+            <a href="mailto:ijenebefrancis@gmail.com" 
                className="stagger-item inline-flex items-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all text-lg group">
               <span>Get in Touch</span>
               <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
@@ -1006,11 +1089,11 @@ export default function Portfolio() {
                  className="text-white/60 hover:text-white transition-colors text-sm uppercase tracking-wider">
                 GitHub
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.linkedin.com/in/francis-ijenebe/" target="_blank" rel="noopener noreferrer"
                  className="text-white/60 hover:text-white transition-colors text-sm uppercase tracking-wider">
                 LinkedIn
               </a>
-              <a href="mailto:contact@francis.dev"
+              <a href="mailto:ijenebefrancis@gmail.com"
                  className="text-white/60 hover:text-white transition-colors text-sm uppercase tracking-wider">
                 Email
               </a>
