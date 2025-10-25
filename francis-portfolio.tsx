@@ -456,6 +456,81 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Github, Linkedin, Mail, ExternalLink, Code2, Smartphone, ArrowUpRight } from 'lucide-react';
 
+function ImageWithLoader({ src, alt, className }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  const handleLoad = () => {
+    // Add artificial delay in development to see the loading animation
+    const isDev = process.env.NODE_ENV === 'development';
+    const delay = isDev ? 2000 : 0; // 2 second delay in dev mode
+    
+    setTimeout(() => {
+      setIsLoading(false);
+    }, delay);
+  };
+
+  return (
+    <div className="relative w-full flex items-center justify-center">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <svg className="loader" width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            {/* Outer rotating hexagon */}
+            <polygon 
+              className="loader-hex-outer" 
+              points="60,10 95,32.5 95,77.5 60,100 25,77.5 25,32.5" 
+              fill="none" 
+              stroke="rgba(255,255,255,0.2)" 
+              strokeWidth="2"
+            />
+            
+            {/* Middle rotating triangle */}
+            <polygon 
+              className="loader-triangle" 
+              points="60,35 80,70 40,70" 
+              fill="none" 
+              stroke="rgba(255,255,255,0.4)" 
+              strokeWidth="2"
+            />
+            
+            {/* Inner pulsing circle */}
+            <circle 
+              className="loader-circle-inner" 
+              cx="60" 
+              cy="60" 
+              r="8" 
+              fill="rgba(255,255,255,0.6)"
+            />
+            
+            {/* Animated dots around */}
+            <circle className="loader-dot loader-dot-1" cx="60" cy="20" r="3" fill="rgba(255,255,255,0.8)" />
+            <circle className="loader-dot loader-dot-2" cx="88" cy="40" r="3" fill="rgba(255,255,255,0.8)" />
+            <circle className="loader-dot loader-dot-3" cx="88" cy="80" r="3" fill="rgba(255,255,255,0.8)" />
+            <circle className="loader-dot loader-dot-4" cx="60" cy="100" r="3" fill="rgba(255,255,255,0.8)" />
+            <circle className="loader-dot loader-dot-5" cx="32" cy="80" r="3" fill="rgba(255,255,255,0.8)" />
+            <circle className="loader-dot loader-dot-6" cx="32" cy="40" r="3" fill="rgba(255,255,255,0.8)" />
+          </svg>
+        </div>
+      )}
+      <img
+        src={src}
+        alt={alt}
+        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
+        onLoad={handleLoad}
+        onError={() => {
+          setIsLoading(false);
+          setHasError(true);
+        }}
+      />
+      {hasError && (
+        <div className="absolute inset-0 flex items-center justify-center text-white/50">
+          <span>Image failed to load</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ShaderBackground() {
   const canvasRef = useRef(null);
 
@@ -839,7 +914,10 @@ export default function Portfolio() {
         {/* Navigation */}
         <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/50 border-b border-white/10">
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-6 flex items-center justify-between">
-            <div className="text-lg font-semibold tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>FRANCIS IJE</div>
+            <div className="flex items-center gap-3">
+              <div className="text-lg font-semibold tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>FrancisIje</div>
+              <img src="/favicon.svg" alt="FI" className="h-6 w-6" />
+            </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#home" 
                  className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'home' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
@@ -882,7 +960,7 @@ export default function Portfolio() {
               Francis Ijenebe
             </h1>
             <div className="text-xl md:text-2xl text-white/60 mb-8 tracking-wider" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-              Software Developer • Mobile & Web
+              Software Developer • Fullstack Mobile & Web
             </div>
             <p className="text-center text-base md:text-lg text-white/70 max-w-xl mx-auto leading-relaxed">
               Crafting scalable, robust and maintainable software solutions for mobile and web platforms.
@@ -909,7 +987,7 @@ export default function Portfolio() {
                      className="stagger-item group block p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
                     {project.image && (
                       <div className="mb-6 overflow-hidden rounded-xl bg-white/5 flex items-center justify-center p-4">
-                        <img 
+                        <ImageWithLoader
                           src={project.image} 
                           alt={project.title}
                           className="max-w-full max-h-96 object-contain group-hover:scale-105 transition-transform duration-500"
@@ -1106,6 +1184,69 @@ export default function Portfolio() {
         .animate-in {
           opacity: 1 !important;
           transform: translateY(0) !important;
+        }
+
+        .loader {
+          filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+        }
+
+        .loader-hex-outer {
+          animation: rotate-slow 4s linear infinite;
+          transform-origin: center;
+        }
+
+        .loader-triangle {
+          animation: rotate-reverse 3s linear infinite;
+          transform-origin: center;
+        }
+
+        .loader-circle-inner {
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loader-dot {
+          animation: fade-pulse 1.5s ease-in-out infinite;
+        }
+
+        .loader-dot-1 { animation-delay: 0s; }
+        .loader-dot-2 { animation-delay: 0.25s; }
+        .loader-dot-3 { animation-delay: 0.5s; }
+        .loader-dot-4 { animation-delay: 0.75s; }
+        .loader-dot-5 { animation-delay: 1s; }
+        .loader-dot-6 { animation-delay: 1.25s; }
+
+        @keyframes rotate-slow {
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes rotate-reverse {
+          100% {
+            transform: rotate(-360deg);
+          }
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scale(1.5);
+            opacity: 1;
+          }
+        }
+
+        @keyframes fade-pulse {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.3);
+          }
         }
       `}</style>
     </div>
