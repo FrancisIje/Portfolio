@@ -441,7 +441,7 @@
 //         {/* Footer */}
 //         <footer className="border-t border-[#2a2a2a] py-8 px-6">
 //           <div className="max-w-6xl mx-auto text-center text-[#888]">
-//             <p>© 2025 Francis Ije. Built with React.</p>
+//             <p>© 2026 Francis Ije. Built with React.</p>
 //           </div>
 //         </footer>
 //       </div>
@@ -1160,7 +1160,7 @@ export default function Portfolio() {
         {/* Footer */}
         <footer className="border-t border-white/10 py-12 px-6 md:px-12">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-white/60">© 2025 Francis Ije. All rights reserved.</p>
+            <p className="text-white/60">© 2026 Francis Ije. All rights reserved.</p>
             <div className="flex gap-6">
               <a href="https://github.com/FrancisIje" target="_blank" rel="noopener noreferrer"
                  className="text-white/60 hover:text-white transition-colors text-sm uppercase tracking-wider">
