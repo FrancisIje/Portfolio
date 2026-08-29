@@ -454,15 +454,17 @@
 // SAMPLE 2 : BACKGROUND WITH ORGANIC MOVING BLOBS SHADER
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Github, Linkedin, Mail, ExternalLink, Code2, Smartphone, ArrowUpRight } from 'lucide-react';
+import SiteBackground from './src/components/SiteBackground';
+import { SiteHeader } from './src/components/DisciplineNav';
+import AnimatedText from './src/components/AnimatedText';
 
-function ImageWithLoader({ src, alt, className }) {
+export function ImageWithLoader({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
   const handleLoad = () => {
     // Add artificial delay in development to see the loading animation
-    const isDev = process.env.NODE_ENV === 'development';
+    const isDev = import.meta.env.DEV;
     const delay = isDev ? 2000 : 0; // 2 second delay in dev mode
     
     setTimeout(() => {
@@ -531,8 +533,8 @@ function ImageWithLoader({ src, alt, className }) {
   );
 }
 
-function ShaderBackground() {
-  const canvasRef = useRef(null);
+export function ShaderBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -639,8 +641,9 @@ function ShaderBackground() {
       }
     `;
 
-    function createShader(gl, type, source) {
+    function createShader(gl: WebGLRenderingContext, type: number, source: string) {
       const shader = gl.createShader(type);
+      if (!shader) return null;
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -660,6 +663,10 @@ function ShaderBackground() {
     }
 
     const program = gl.createProgram();
+    if (!program) {
+      console.error('Failed to create program');
+      return;
+    }
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
@@ -688,7 +695,7 @@ function ShaderBackground() {
     let mouseY = 0.5;
     let lastMouseMove = Date.now();
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX / window.innerWidth;
       mouseY = 1.0 - e.clientY / window.innerHeight;
       lastMouseMove = Date.now();
@@ -697,7 +704,9 @@ function ShaderBackground() {
     window.addEventListener('mousemove', handleMouseMove);
 
     let startTime = Date.now();
-    function render() {
+    // Arrow form (like setSize/handleMouseMove above) so the null guards on
+    // canvas and gl above still narrow inside this closure.
+    const render = () => {
       const currentTime = (Date.now() - startTime) * 0.001;
       
       gl.useProgram(program);
@@ -714,7 +723,7 @@ function ShaderBackground() {
       
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       requestAnimationFrame(render);
-    }
+    };
     render();
 
     return () => {
@@ -728,526 +737,38 @@ function ShaderBackground() {
 
 export default function Portfolio() {
   const [isVisible, setIsVisible] = useState(false);
-  const [activeSection, setActiveSection] = useState('');
-  const [currentFont, setCurrentFont] = useState(0);
-  const aboutRef = useRef(null);
-  const capabilitiesRef = useRef(null);
-  const workRef = useRef(null);
-  const contactRef = useRef(null);
-
-  const fonts = [
-    { family: '"Didot", "Bodoni MT", "Times New Roman", serif', weight: '700' },
-    { family: '"Futura", "Century Gothic", "AppleGothic", sans-serif', weight: '700' },
-    { family: '"Rockwell", "Courier Bold", "Courier", monospace', weight: '700' },
-    { family: '"Copperplate", "Copperplate Gothic Light", fantasy', weight: '700' },
-    { family: '"Optima", "Candara", "Calibri", sans-serif', weight: '600' },
-    { family: '"Garamond", "Baskerville", "Hoefler Text", serif', weight: '700' },
-    { family: '"Avenir Next", "Avenir", "Century Gothic", sans-serif', weight: '700' },
-    { family: '"Palatino", "Palatino Linotype", "Book Antiqua", serif', weight: '700' },
-    { family: '"Gill Sans", "Gill Sans MT", "Trebuchet MS", sans-serif', weight: '700' },
-    { family: '"Franklin Gothic", "Arial Black", "Impact", sans-serif', weight: '900' },
-    { family: '"Helvetica Neue", "Helvetica", "Arial", sans-serif', weight: '700' },
-    { family: '"Bodoni MT", "Didot", "Georgia", serif', weight: '700' },
-    { family: '"Century Schoolbook", "Century", "Times", serif', weight: '700' },
-    { family: '"Trebuchet MS", "Lucida Grande", "Lucida Sans", sans-serif', weight: '700' },
-    { family: '"Consolas", "Monaco", "Courier New", monospace', weight: '900' },
-  ];
 
   useEffect(() => {
     setIsVisible(true);
-
-    // Cycle through fonts - faster now (1 second)
-    const fontInterval = setInterval(() => {
-      setCurrentFont((prev) => (prev + 1) % fonts.length);
-    }, 1000);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-            
-            // Stagger child animations
-            const staggerItems = entry.target.querySelectorAll('.stagger-item');
-            staggerItems.forEach((item, idx) => {
-              setTimeout(() => {
-                item.classList.add('animate-in');
-              }, idx * 100);
-            });
-          } else {
-            // Remove animation classes when scrolling away
-            entry.target.classList.remove('animate-in');
-            const staggerItems = entry.target.querySelectorAll('.stagger-item');
-            staggerItems.forEach((item) => {
-              item.classList.remove('animate-in');
-            });
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px' }
-    );
-
-    if (aboutRef.current) {
-      observer.observe(aboutRef.current);
-    }
-    if (capabilitiesRef.current) {
-      observer.observe(capabilitiesRef.current);
-    }
-    if (workRef.current) {
-      observer.observe(workRef.current);
-    }
-    if (contactRef.current) {
-      observer.observe(contactRef.current);
-    }
-
-    // Track active section
-    const handleScroll = () => {
-      const sections = ['home', 'work', 'about', 'contact'];
-      const current = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
-        }
-        return false;
-      });
-      if (current) setActiveSection(current);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', handleScroll);
-    };
   }, []);
-
-  const mobileProjects = [
-    {
-      title: "Bookaleap",
-      description: "Easily find and book top personal trainers, nutrition coaches, physiotherapists, and more wellness professionals with just a few clicks.",
-      tech: ["Flutter", "Dart", "Firebase", "REST APIs"],
-      link: "#",
-      year: "2024",
-      isLive: true,
-      image: "/bookaleap.png",
-      appStoreLink: "https://apps.apple.com/tr/app/bookaleap/id6447549852?platform=iphone",
-      playStoreLink: "https://play.google.com/store/apps/details?id=com.vebbuilders.bookleap&hl=en_US"
-    },
-    {
-      title: "Deeply Dating App",
-      description: "A full-featured mobile dating application with real-time messaging, profile matching, and media storage capabilities.",
-      tech: ["Flutter", "WebSockets", "Node.js", "MongoDB", "Azure Storage"],
-      link: "https://drive.google.com/file/d/1RwmrTLIgRK6eUPNO9wGL_7vjRrexRFFJ/view",
-      year: "2024",
-      image: "/dating-app.png"
-    },
-    {
-      title: "SpeakUp",
-      description: "An AI-powered language coach using ChatGPT API with voice recording, transcribing, and pronunciation assessment features to help users improve their language skills.",
-      tech: ["Flutter", "ChatGPT API", "Firebase", "Speech Recognition", "AI/ML"],
-      link: "https://drive.google.com/file/d/13bxZW8b5wFYTXoJLsIQQJRh-1YZa2dvT/view",
-      year: "2024",
-      image: "/speakup banner.png"
-    },
-    // {
-    //   title: "Meditation App",
-    //   description: "A user-centric mobile application designed to enhance mindfulness and meditation practices.",
-    //   tech: ["Flutter", "Dart", "Firebase"],
-    //   link: "#",
-    //   year: "2024"
-    // },
-    // {
-    //   title: "Cross-Platform Mobile",
-    //   description: "Robust iOS and Android applications with seamless performance and native experiences.",
-    //   tech: ["React Native", "JavaScript", "REST APIs"],
-    //   link: "#",
-    //   year: "2024"
-    // },
-    // {
-    //   title: "Native Mobile Solution",
-    //   description: "High-performance native applications with smooth animations and optimized resources.",
-    //   tech: ["Flutter", "Dart", "SQLite"],
-    //   link: "#",
-    //   year: "2023"
-    // }
-  ];
-
-  const webGLSLProjects = [
-    {
-      title: "WebGL Experience",
-      description: "Immersive web experiences using WebGL and custom GLSL shaders.",
-      tech: ["WebGL", "GLSL", "JavaScript"],
-      link: "#",
-      year: "2024"
-    },
-    {
-      title: "Shader Art Gallery",
-      description: "Procedural graphics and shader-based animations showcasing creative coding.",
-      tech: ["GLSL", "Three.js", "React"],
-      link: "#",
-      year: "2023"
-    },
-    {
-      title: "Web Applications",
-      description: "Modern web applications with interactive interfaces and smooth experiences.",
-      tech: ["React", "JavaScript", "CSS"],
-      link: "#",
-      year: "2024"
-    }
-  ];
-
-  const skills = [
-    "Dart", "JavaScript", "Python", "Go", "C",
-    "Flutter", "React Native", "React", "Node.js",
-    "PostgreSQL", "MongoDB", "WebSockets", "REST APIs",
-    "AWS", "Firebase", "Azure",
-    "Mobile Development", "Web Development", "Full-Stack",
-    "WebGL", "GLSL", "CI/CD"
-  ];
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-x-hidden" style={{ fontFamily: '"Inter", system-ui, -apple-system, sans-serif' }}>
-      <ShaderBackground />
+      <SiteBackground />
 
       <div className="relative z-10">
-        {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/50 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 py-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* <div className="text-lg font-semibold tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>FrancisIje</div> */}
-              <img src="/favicon.svg" alt="FI" className="h-6 w-6" />
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#home" 
-                 className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'home' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
-                Home
-              </a>
-              <a href="#work" 
-                 className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'work' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
-                Work
-              </a>
-              <a href="#about" 
-                 className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'about' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
-                About
-              </a>
-              <a href="#contact" 
-                 className={`text-sm uppercase tracking-wider transition-colors ${activeSection === 'contact' ? 'text-white' : 'text-white/50 hover:text-white'}`}>
-                Contact
-              </a>
-            </div>
-            <div className="flex gap-4">
-              <a href="https://github.com/FrancisIje" target="_blank" rel="noopener noreferrer" 
-                 className="hover:opacity-70 transition-opacity">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="mailto:ijenebefrancis@gmail.com" 
-                 className="hover:opacity-70 transition-opacity">
-                <Mail className="w-5 h-5" />
-              </a>
-              <a href="https://www.linkedin.com/in/francis-ijenebe/" target="_blank" rel="noopener noreferrer"
-                 className="hover:opacity-70 transition-opacity">
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-        </nav>
+        <SiteHeader />
 
-        {/* Hero Section */}
-        <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 pt-24">
-          <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <h1 className="text-5xl md:text-7xl lg:text-9xl font-semibold mb-8 tracking-tight leading-none" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-              Francis Ijenebe
+        {/* Hero: the whole of the home page. Everything else lives on the
+            discipline pages, reachable from the rail and the strip. */}
+        <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 pt-28 pb-16">
+          <div className={`w-full max-w-5xl mx-auto px-5 text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <h1 className="text-[clamp(3rem,13vw,8.25rem)] font-bold mb-10 tracking-[-0.05em] leading-[0.9]" style={{ fontFamily: '"Space Grotesk", "Inter", system-ui, sans-serif' }}>
+              <AnimatedText text="Francis Ijenebe" stagger={60} />
             </h1>
-            <div className="text-xl md:text-2xl text-white/60 mb-8 tracking-wider" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-              Software Developer • Fullstack Mobile & Web
+            <div className="text-lg md:text-xl text-white/60 mb-10 uppercase tracking-[0.2em] leading-[1.6]">
+              <AnimatedText text="Generalist Software Engineer" delay={950} stagger={24} />
             </div>
-            <p className="text-center text-base md:text-lg text-white/70 max-w-xl mx-auto leading-relaxed">
-              Crafting scalable, robust and maintainable software solutions for mobile and web platforms.
+            <p className="text-center text-xl md:text-2xl text-white/70 max-w-4xl mx-auto leading-[1.6]">
+              <AnimatedText
+                text="I ship and maintain software solutions across mobile, web, backend and the infrastructure they run on."
+                delay={1600}
+                stagger={9}
+              />
             </p>
           </div>
-        </section> 
-
-        {/* Projects Section */}
-        <section id="work" ref={workRef} className="section-animate py-24 px-6 md:px-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="stagger-item">
-              <span className="text-sm uppercase tracking-widest text-white/60 mb-8 block">Selected Work</span>
-            </div>
-            
-            {/* Mobile Development */}
-            <div className="mb-20">
-              <div className="stagger-item flex items-baseline gap-4 mb-10">
-                <Smartphone className="w-6 h-6 text-white/60" />
-                <h3 className="text-3xl md:text-4xl font-semibold tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>Mobile Development</h3>
-              </div>
-              <div className="space-y-4">
-                {mobileProjects.map((project, idx) => (
-                  <div key={idx} 
-                     className="stagger-item group block p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
-                    {project.image && (
-                      <div className="mb-6 overflow-hidden rounded-xl bg-white/5 flex items-center justify-center p-4">
-                        <ImageWithLoader
-                          src={project.image} 
-                          alt={project.title}
-                          className="max-w-full max-h-96 object-contain group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
-                          <h4 className="text-2xl font-bold">{project.title}</h4>
-                          {project.isLive && (
-                            <span className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
-                              LIVE
-                            </span>
-                          )}
-                          <span className="text-sm text-white/50">{project.year}</span>
-                        </div>
-                        <p className="text-white/70 leading-relaxed mb-4">{project.description}</p>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {project.tech.map((tech, i) => (
-                            <span key={i} className="text-xs px-3 py-1 bg-black/60 border border-white/10 rounded-full text-white/60">
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                        {(project.appStoreLink || project.playStoreLink) && (
-                          <div className="flex gap-3 mt-4">
-                            {project.appStoreLink && (
-                              <a 
-                                href={project.appStoreLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 transition-all flex items-center gap-2"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span>App Store</span>
-                                <ArrowUpRight className="w-3 h-3" />
-                              </a>
-                            )}
-                            {project.playStoreLink && (
-                              <a 
-                                href={project.playStoreLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 transition-all flex items-center gap-2"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span>Play Store</span>
-                                <ArrowUpRight className="w-3 h-3" />
-                              </a>
-                            )}
-                          </div>
-                        )}
-                        {project.link && !project.appStoreLink && !project.playStoreLink && project.link !== "#" && (
-                          <a 
-                            href={project.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white mt-4 transition-colors"
-                          >
-                            <span>View Project</span>
-                            <ArrowUpRight className="w-4 h-4" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Web & GLSL */}
-            <div>
-              <div className="stagger-item flex items-baseline gap-4 mb-10">
-                <Code2 className="w-6 h-6 text-white/60" />
-                <h3 className="text-3xl md:text-4xl font-semibold tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>Web & GLSL</h3>
-              </div>
-              <div className="space-y-4">
-                {webGLSLProjects.map((project, idx) => (
-                  <a key={idx} href={project.link}
-                     className="stagger-item group block p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
-                          <h4 className="text-2xl font-bold">{project.title}</h4>
-                          <span className="text-sm text-white/50">{project.year}</span>
-                        </div>
-                        <p className="text-white/70 leading-relaxed mb-4">{project.description}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {project.tech.map((tech, i) => (
-                            <span key={i} className="text-xs px-3 py-1 bg-black/60 border border-white/10 rounded-full text-white/60">
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <ArrowUpRight className="w-6 h-6 text-white/40 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
         </section>
-
-        {/* About Section */}
-        <section id="about" ref={aboutRef} className="section-animate min-h-screen flex items-center px-6 md:px-12 py-24">
-          <div className="max-w-7xl mx-auto w-full">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="stagger-item">
-                <span className="text-sm uppercase tracking-widest text-white/60 mb-6 block">About</span>
-                <h2 className="text-4xl md:text-6xl font-semibold mb-8 tracking-tight leading-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-                  Building software that solves real problems
-                </h2>
-              </div>
-              <div className="space-y-6 text-lg text-white/80 leading-relaxed">
-                <p className="stagger-item">
-                  I'm a software developer who builds and ships apps for both mobile and web. I create smooth user interfaces with Flutter and React, and I handle the backend too—using whatever fits best, whether that's Node.js, Dart, Python, or Go.
-                </p>
-                <p className="stagger-item">
-                  I work with all sorts of databases, from SQL options like PostgreSQL to NoSQL ones like MongoDB, and I love adding real-time features with WebSockets.
-                </p>
-                <p className="stagger-item">
-                  Plus, I don't just build apps—I get them out into the world. I've published mobile apps on the Apple App Store and Google Play Store, and I deploy web apps using platforms like AWS, Firebase, and Vercel.
-                </p>
-                <p className="stagger-item">
-                  Passionate about continuous learning and staying current with industry best practices. I thrive in collaborative environments and enjoy tackling complex technical challenges.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Capabilities */}
-        <section ref={capabilitiesRef} className="section-animate py-24 px-6 md:px-12 border-y border-white/10">
-          <div className="max-w-7xl mx-auto">
-            <div className="stagger-item">
-              <span className="text-sm uppercase tracking-widest text-white/60 mb-8 block">Capabilities</span>
-              <h2 className="text-3xl md:text-5xl font-semibold mb-12 tracking-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-                Technical skills and expertise
-              </h2>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {skills.map((skill, idx) => (
-                <div key={idx} 
-                     className="stagger-item px-6 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 transition-all">
-                  <span className="text-sm uppercase tracking-wider">{skill}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Contact CTA */}
-        <section id="contact" ref={contactRef} className="section-animate py-32 px-6 md:px-12 border-t border-white/10">
-          <div className="max-w-7xl mx-auto text-center">
-            <h2 className="stagger-item text-4xl md:text-6xl lg:text-7xl font-semibold mb-8 tracking-tight leading-tight" style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-              Let's work on your<br />next project together
-            </h2>
-            <p className="stagger-item text-xl text-white/70 mb-12 max-w-2xl mx-auto">
-              Open to new opportunities and collaborations. Let's discuss how I can contribute to your team or project.
-            </p>
-            <a href="mailto:ijenebefrancis@gmail.com" 
-               className="stagger-item inline-flex items-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all text-lg group">
-              <span>Get in Touch</span>
-              <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
-            </a>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="border-t border-white/10 py-12 px-6 md:px-12">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-white/60">© 2026 Francis Ije. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="https://github.com/FrancisIje" target="_blank" rel="noopener noreferrer"
-                 className="text-white/60 hover:text-white transition-colors text-sm uppercase tracking-wider">
-                GitHub
-              </a>
-              <a href="https://www.linkedin.com/in/francis-ijenebe/" target="_blank" rel="noopener noreferrer"
-                 className="text-white/60 hover:text-white transition-colors text-sm uppercase tracking-wider">
-                LinkedIn
-              </a>
-              <a href="mailto:ijenebefrancis@gmail.com"
-                 className="text-white/60 hover:text-white transition-colors text-sm uppercase tracking-wider">
-                Email
-              </a>
-            </div>
-          </div>
-        </footer>
       </div>
-
-      <style>{`
-        .animate-in {
-          opacity: 1 !important;
-          transform: translateY(0) !important;
-        }
-
-        .loader {
-          filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
-        }
-
-        .loader-hex-outer {
-          animation: rotate-slow 4s linear infinite;
-          transform-origin: center;
-        }
-
-        .loader-triangle {
-          animation: rotate-reverse 3s linear infinite;
-          transform-origin: center;
-        }
-
-        .loader-circle-inner {
-          animation: pulse 2s ease-in-out infinite;
-        }
-
-        .loader-dot {
-          animation: fade-pulse 1.5s ease-in-out infinite;
-        }
-
-        .loader-dot-1 { animation-delay: 0s; }
-        .loader-dot-2 { animation-delay: 0.25s; }
-        .loader-dot-3 { animation-delay: 0.5s; }
-        .loader-dot-4 { animation-delay: 0.75s; }
-        .loader-dot-5 { animation-delay: 1s; }
-        .loader-dot-6 { animation-delay: 1.25s; }
-
-        @keyframes rotate-slow {
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes rotate-reverse {
-          100% {
-            transform: rotate(-360deg);
-          }
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.6;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 1;
-          }
-        }
-
-        @keyframes fade-pulse {
-          0%, 100% {
-            opacity: 0.3;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.3);
-          }
-        }
-      `}</style>
     </div>
   );
 }

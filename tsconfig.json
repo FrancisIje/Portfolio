@@ -6,10 +6,10 @@
     "jsx": "react-jsx",
   "moduleResolution": "bundler",
     "allowJs": false,
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
   "skipLibCheck": true,
-  "types": ["node"],
+  "types": ["node", "vite/client"],
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "baseUrl": "."
