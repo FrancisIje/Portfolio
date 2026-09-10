@@ -6,35 +6,71 @@ html, body, #root {
   margin: 0;
 }
 body {
-  background: #0a0a0a;
+  /* Matches the page root and the shader host. Mobile rubber-band scrolling
+     paints the body colour past the ends of the page, so any mismatch here
+     reads as a pale flash at the top and bottom of every scroll. */
+  background: #000000;
   color: white;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* No bounce past the ends of the document, and no grey tap flash on the
+   cards and links, both of which show up as flicker on touch devices. */
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Utility to ensure fixed full-screen canvas doesn't block content */
 canvas { display: block; }
 
-/* Smooth section animations inspired by seun.design */
-.section-animate {
-  opacity: 0;
-  transform: translateY(60px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.section-animate.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
+/* Scroll reveal. Each card, heading block and CTA lifts into place once, the
+   first time it comes near the viewport, and then stays put — see the observer
+   in PageShell. Whole sections deliberately do NOT fade any more: fading a
+   section out again on the way past made the shader background flash through
+   it on every scroll, which is very obvious on a short mobile viewport. */
 .stagger-item {
   opacity: 0;
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  /* translate3d, not translateY: keeps the element on its own compositor layer
+     for the length of the transition instead of repainting it each frame. */
+  transform: translate3d(0, 28px, 0);
+  /* The colour parts are here rather than on a Tailwind `transition-*` utility
+     because this rule is unlayered and would otherwise override the utility,
+     leaving the hover states snapping instead of easing. */
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 250ms ease,
+    border-color 250ms ease;
+  backface-visibility: hidden;
 }
 
 .stagger-item.animate-in {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item {
+    opacity: 1;
+    transform: none;
+    transition: background-color 250ms ease, border-color 250ms ease;
+  }
+}
+
+/* A backdrop blur has to re-sample everything underneath it every frame, and
+   underneath these cards is a full-screen animated WebGL canvas. On phone GPUs
+   that is what tears and flickers as the page moves. The cards keep their
+   translucent fill; only the blur pass goes. */
+@media (max-width: 767px) {
+  /* Prefixed first: the build's CSS minifier treats a hand-written -webkit-
+     declaration as overriding the standard one before it, and drops the
+     standard property from the output entirely. Written this way round it
+     keeps `backdrop-filter` and re-adds the prefix itself. */
+  [class*="backdrop-blur"] {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 /* Horizontal nav strips scroll without showing a scrollbar */
@@ -50,7 +86,15 @@ canvas { display: block; }
    It fills this box; this box is the viewport, behind the content layer. */
 .shader-frame {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Large-viewport height: the box stays the size it would be with the mobile
+     browser chrome hidden, so showing and hiding the URL bar mid-scroll does
+     not resize it. A resize reallocates the WebGL drawing buffer, which clears
+     it to transparent until the next frame — the flash this is here to stop. */
+  height: 100lvh;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;

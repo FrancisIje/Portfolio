@@ -13,8 +13,20 @@ export function RibbonFieldBackground({ className = "", ...props }: RibbonFieldB
     const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW); const position = gl.getAttribLocation(program, "position"); gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     const resolution = gl.getUniformLocation(program, "resolution"), time = gl.getUniformLocation(program, "time"), pointerUniform = gl.getUniformLocation(program, "pointer"); let mouseX = 0.72, mouseY = 0.42, targetX = 0.72, targetY = 0.42, frame = 0, visible = true; const startedAt = performance.now();
     const pointer = (event: PointerEvent) => { const bounds = host.getBoundingClientRect(); targetX = 0.72 + (((event.clientX - bounds.left) / Math.max(bounds.width, 1)) - 0.72) * optionsRef.current.pointerAmount; targetY = 0.42 + ((1 - (event.clientY - bounds.top) / Math.max(bounds.height, 1)) - 0.42) * optionsRef.current.pointerAmount; };
-    const resize = () => { const bounds = host.getBoundingClientRect(), ratio = Math.min(window.devicePixelRatio || 1, 2); canvas.width = Math.max(1, Math.floor(bounds.width * ratio)); canvas.height = Math.max(1, Math.floor(bounds.height * ratio)); gl.viewport(0, 0, canvas.width, canvas.height); gl.uniform2f(resolution, canvas.width, canvas.height); };
-    const render = (now: number) => { const options = optionsRef.current; mouseX += (targetX - mouseX) * options.smoothing; mouseY += (targetY - mouseY) * options.smoothing; gl.uniform1f(time, (now - startedAt) * 0.001 * options.speed); gl.uniform2f(pointerUniform, mouseX, mouseY); gl.drawArrays(gl.TRIANGLES, 0, 6); frame = visible && !document.hidden ? requestAnimationFrame(render) : 0; };
+    const draw = (now: number) => { const options = optionsRef.current; mouseX += (targetX - mouseX) * options.smoothing; mouseY += (targetY - mouseY) * options.smoothing; gl.uniform1f(time, (now - startedAt) * 0.001 * options.speed); gl.uniform2f(pointerUniform, mouseX, mouseY); gl.drawArrays(gl.TRIANGLES, 0, 6); };
+    // Assigning canvas.width/height reallocates the drawing buffer and clears it
+    // to transparent, so a resize that changes nothing still costs a blank frame
+    // — which is what made the page background flash through on mobile, where
+    // the ResizeObserver fires every time the browser chrome slides away. Only
+    // that reallocation is skipped when the size is unchanged, and it repaints
+    // in the same task when it isn't, so a cleared buffer is never left on
+    // screen waiting for the next frame. The viewport and the resolution
+    // uniform are always restated: uniform locations belong to a program, and
+    // in StrictMode the effect tears down and relinks one over a canvas that is
+    // already the right size, so a size-guarded uniform would never be set on
+    // the replacement program and the shader would render into a 0x0 field.
+    const resize = () => { const bounds = host.getBoundingClientRect(), ratio = Math.min(window.devicePixelRatio || 1, 2), width = Math.max(1, Math.floor(bounds.width * ratio)), height = Math.max(1, Math.floor(bounds.height * ratio)), changed = width !== canvas.width || height !== canvas.height; if (changed) { canvas.width = width; canvas.height = height; } gl.viewport(0, 0, width, height); gl.uniform2f(resolution, width, height); if (changed) draw(performance.now()); };
+    const render = (now: number) => { draw(now); frame = visible && !document.hidden ? requestAnimationFrame(render) : 0; };
     const resizeObserver = new ResizeObserver(resize), intersection = new IntersectionObserver(([entry]) => { visible = entry?.isIntersecting ?? true; if (visible && !frame) frame = requestAnimationFrame(render); if (!visible && frame) cancelAnimationFrame(frame), frame = 0; }); resizeObserver.observe(host); intersection.observe(host); host.addEventListener("pointermove", pointer, { passive: true }); resize(); frame = requestAnimationFrame(render);
     return () => { if (frame) cancelAnimationFrame(frame); resizeObserver.disconnect(); intersection.disconnect(); host.removeEventListener("pointermove", pointer); gl.deleteBuffer(buffer); gl.deleteShader(vertex); gl.deleteShader(fragment); gl.deleteProgram(program); };
   }, []);

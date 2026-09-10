@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Portfolio from '../francis-portfolio'
-import Infrastructure from './pages/Infrastructure'
+import DesignEngineering from './pages/DesignEngineering'
 import MobileDev from './pages/MobileDev'
-import GtmEngineering from './pages/GtmEngineering'
 import Backend from './pages/Backend'
-import Frontend from './pages/Frontend'
-import WebGL from './pages/WebGL'
+import PlatformEngineering from './pages/PlatformEngineering'
+import DevX from './pages/DevX'
+import { legacyRedirects } from './data/disciplines'
 import BlockReveal, {
   BLOCK_REVEAL_COVER_MS,
   BLOCK_REVEAL_UNCOVER_MS,
@@ -15,26 +15,35 @@ import BlockReveal, {
 import './styles.css'
 
 const routes = {
-  '/infrastructure': Infrastructure,
+  '/design-engineering': DesignEngineering,
   '/mobile': MobileDev,
-  '/gtm-engineering': GtmEngineering,
   '/backend': Backend,
-  '/frontend': Frontend,
-  '/webgl': WebGL,
+  '/platform-engineering': PlatformEngineering,
+  '/devx': DevX,
 }
+
+// Retired slugs resolve to whichever page absorbed them, and the address bar is
+// corrected in place so nobody keeps sharing the dead link.
+const resolvePath = (path: string) => legacyRedirects[path] ?? path
 
 const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function App() {
-  const [path, setPath] = useState(window.location.pathname)
+  const [path, setPath] = useState(() => {
+    const resolved = resolvePath(window.location.pathname)
+    if (resolved !== window.location.pathname) {
+      window.history.replaceState({}, '', resolved)
+    }
+    return resolved
+  })
   // The route actually on screen. It lags behind `path` while the blocks are
   // covering, so the outgoing page stays mounted until it is hidden.
   const [renderedPath, setRenderedPath] = useState(path)
   const [phase, setPhase] = useState<BlockRevealPhase>('idle')
 
   useEffect(() => {
-    const handlePopState = () => setPath(window.location.pathname)
+    const handlePopState = () => setPath(resolvePath(window.location.pathname))
     window.addEventListener('popstate', handlePopState)
 
     // Intercept same-origin link clicks so navigation stays client side
@@ -46,8 +55,9 @@ function App() {
       if (!href || !href.startsWith('/') || anchor.target === '_blank') return
       e.preventDefault()
       if (href === window.location.pathname) return
-      window.history.pushState({}, '', href)
-      setPath(href)
+      const target = resolvePath(href)
+      window.history.pushState({}, '', target)
+      setPath(target)
     }
     document.addEventListener('click', handleClick)
 

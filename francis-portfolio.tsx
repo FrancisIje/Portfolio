@@ -757,11 +757,11 @@ export default function Portfolio() {
               <AnimatedText text="Francis Ijenebe" stagger={60} />
             </h1>
             <div className="text-lg md:text-xl text-white/60 mb-10 uppercase tracking-[0.2em] leading-[1.6]">
-              <AnimatedText text="Generalist Software Engineer" delay={950} stagger={24} />
+              <AnimatedText text="Product & Platform Engineer" delay={950} stagger={24} />
             </div>
             <p className="text-center text-xl md:text-2xl text-white/70 max-w-4xl mx-auto leading-[1.6]">
               <AnimatedText
-                text="I ship and maintain software solutions across mobile, web, backend and the infrastructure they run on."
+                text="I design and ship software end to end: mobile apps, the interfaces around them, the backend architecture underneath, and the platform and tooling it all runs on."
                 delay={1600}
                 stagger={9}
               />

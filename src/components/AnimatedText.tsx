@@ -88,6 +88,10 @@ export function useParallax<T extends HTMLElement>(strength = 0.12) {
     const node = ref.current;
     if (!node) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // A coarse pointer means a touch screen, where this costs a layout read on
+    // every scroll frame and the drift is barely legible anyway. Skip it there
+    // and let the card carry the motion on its own.
+    if (window.matchMedia('(pointer: coarse)').matches) return;
 
     let frame = 0;
 

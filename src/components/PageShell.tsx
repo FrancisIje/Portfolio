@@ -35,33 +35,45 @@ type PageShellProps = {
 export default function PageShell({ slug, eyebrow, title, intro, tags = [], children }: PageShellProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
+  // Scroll reveal. Every card and heading block is watched individually and
+  // lifts into place the first time it nears the viewport, then is unobserved:
+  // the reveal is one-way. The previous version watched whole sections and
+  // stripped the class again on the way out, which faded entire sections back
+  // to transparent as you scrolled past them — on a phone, where a section is
+  // barely taller than the viewport, that read as the background flashing
+  // through the page.
   useEffect(() => {
     window.scrollTo(0, 0);
 
+    const root = rootRef.current;
+    if (!root) return;
+
+    const items = root.querySelectorAll<HTMLElement>('.stagger-item');
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      items.forEach((item) => item.classList.add('animate-in'));
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
+        // Cards that cross the line in the same batch — a row of a grid, say —
+        // cascade instead of all arriving at once.
+        let order = 0;
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-            const staggerItems = entry.target.querySelectorAll('.stagger-item');
-            staggerItems.forEach((item, idx) => {
-              setTimeout(() => item.classList.add('animate-in'), idx * 80);
-            });
-          } else {
-            entry.target.classList.remove('animate-in');
-            entry.target.querySelectorAll('.stagger-item').forEach((item) => {
-              item.classList.remove('animate-in');
-            });
-          }
+          if (!entry.isIntersecting) return;
+          const item = entry.target as HTMLElement;
+          item.style.transitionDelay = `${order++ * 70}ms`;
+          item.classList.add('animate-in');
+          observer.unobserve(item);
         });
       },
-      { threshold: 0.1, rootMargin: '0px' }
+      // Trips a little before the item is fully on screen, so its motion has
+      // settled by the time it reaches a comfortable reading position.
+      { threshold: 0, rootMargin: '0px 0px -10% 0px' }
     );
 
-    const sections = rootRef.current
-      ? rootRef.current.querySelectorAll('.section-animate')
-      : [];
-    sections.forEach((section) => observer.observe(section));
+    items.forEach((item) => observer.observe(item));
 
     return () => observer.disconnect();
   }, [slug]);
@@ -110,14 +122,14 @@ export default function PageShell({ slug, eyebrow, title, intro, tags = [], chil
 
 
         {/* Contact CTA */}
-        <section className="section-animate py-20 px-6 md:px-12 border-t border-white/10">
+        <section className="py-20 px-6 md:px-12 border-t border-white/10">
           <div className="max-w-7xl mx-auto text-center">
             <h2 className="stagger-item text-4xl md:text-6xl font-semibold mb-8 tracking-[-0.03em] leading-tight" style={{ fontFamily: HEADING_FONT }}>
               <AnimatedText text={"Let's build\nsomething together"} stagger={40} />
             </h2>
             <p className="stagger-item text-xl text-white/70 mb-12 max-w-2xl mx-auto">
               <AnimatedText
-                text="Happy to walk through any of it in detail, whether that's the architecture, the trade-offs, or the code behind it."
+                text="Happy to walk through any of it in detail, whether that's the architecture, the tradeoffs, or the code behind it."
                 stagger={8}
               />
             </p>
@@ -172,7 +184,7 @@ export function Section({ eyebrow, heading, lede, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <section className="section-animate py-16 px-6 md:px-12 border-t border-white/10">
+    <section className="py-16 px-6 md:px-12 border-t border-white/10">
       <div className="max-w-7xl mx-auto">
         <div className="stagger-item">
           <span className="text-sm uppercase tracking-widest text-white/60 mb-5 block"><AnimatedText text={eyebrow} stagger={30} /></span>
@@ -198,12 +210,12 @@ export function SkillGroups({ groups }: { groups: SkillGroup[] }) {
       {groups.map((group, idx) => {
         const Icon = group.icon;
         return (
-          <div key={idx} className="stagger-item p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+          <div key={idx} className="stagger-item p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10">
             <div className="flex items-start gap-4 mb-6">
               <Icon className="w-6 h-6 text-white/60 shrink-0 mt-1" />
               <div>
-                <h3 className="text-2xl font-bold"><AnimatedText text={group.title} stagger={26} /></h3>
-                <p className="text-sm text-white/50 mt-1"><AnimatedText text={group.note} delay={180} stagger={7} /></p>
+                <h3 className="text-2xl font-bold">{group.title}</h3>
+                <p className="text-sm text-white/50 mt-1">{group.note}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -226,9 +238,9 @@ export function CardGrid({ cards, columns = 2 }: { cards: Card[]; columns?: 2 | 
   return (
     <div className={`grid ${gridClass} gap-4`}>
       {cards.map((card, idx) => (
-        <div key={idx} className="stagger-item p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
-          <h3 className="text-xl font-bold mb-3"><AnimatedText text={card.title} stagger={26} /></h3>
-          <p className="text-white/70 leading-relaxed"><AnimatedText text={card.body} delay={180} stagger={7} /></p>
+        <div key={idx} className="stagger-item p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10">
+          <h3 className="text-xl font-bold mb-3">{card.title}</h3>
+          <p className="text-white/70 leading-relaxed">{card.body}</p>
         </div>
       ))}
     </div>

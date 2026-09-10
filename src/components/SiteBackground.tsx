@@ -29,9 +29,17 @@ export default function SiteBackground({ baseHue = 0 }: { baseHue?: number }) {
     const frame = frameRef.current;
     if (!frame || reducedMotion) return;
 
+    // Resolved once. Looking it up per event meant a DOM query on every frame
+    // of every pointer movement.
+    const host = frame.querySelector('.threeui-background');
+    if (!host) return;
+
     const forward = (event: PointerEvent) => {
-      const host = frame.querySelector('.threeui-background');
-      if (!host) return;
+      // Mouse only. A touch drag is a scroll, not a cursor, and on mobile it
+      // fires this continuously — each forwarded event makes the renderer take
+      // a getBoundingClientRect, forcing layout mid-scroll for a trail effect
+      // there is no cursor to trail.
+      if (event.pointerType !== 'mouse') return;
       host.dispatchEvent(new PointerEvent('pointermove', {
         clientX: event.clientX,
         clientY: event.clientY,

@@ -1,13 +1,13 @@
 import React from 'react';
 import { ArrowUpRight, Smartphone, Lightbulb, Radio, Video, Gauge, Sparkles, Store } from 'lucide-react';
 import PageShell, { Section, SkillGroups } from '../components/PageShell';
-import AnimatedText, { useParallax } from '../components/AnimatedText';
+import { useParallax } from '../components/AnimatedText';
 import { ImageWithLoader } from '../../francis-portfolio';
 
 const projects = [
   {
     title: "Rojar",
-    description: "A social commerce marketplace where selling starts in minutes and buyers discover products through content. It has a social feed of posts and stories, seller storefronts, in-app chat with voice notes for negotiating an order, and order tracking with secure payments.",
+    description: "A social commerce marketplace where selling starts in minutes and buyers discover products through content. It has a social feed of posts and stories, seller storefronts, chat with voice notes for negotiating an order, and order tracking with secure payments.",
     tech: ["Flutter", "WebSockets", "REST APIs", "Audio Recording", "Payments", "Push Notifications"],
     isLive: true,
     image: "/rojar.png",
@@ -16,7 +16,7 @@ const projects = [
   },
   {
     title: "Heala",
-    description: "An integrated healthcare platform that connects patients to doctors through in-app chat, voice and video consultations. It also includes a symptom checker that ranks likely conditions, plus a personal health profile with daily activity tracking.",
+    description: "An integrated healthcare platform that connects patients to doctors through chat, voice and video consultations. It also includes a symptom checker that ranks likely conditions, plus a personal health profile with daily activity tracking.",
     tech: ["Flutter", "WebRTC", "WebSockets", "REST APIs", "Push Notifications"],
     isLive: true,
     image: "/heala.png",
@@ -35,7 +35,7 @@ const projects = [
   },
   {
     title: "Deeply Dating App",
-    description: "A full-featured mobile dating application with real-time messaging, profile matching, and media storage capabilities.",
+    description: "A complete mobile dating application with realtime messaging, profile matching, and media storage capabilities.",
     tech: ["Flutter", "WebSockets", "Node.js", "MongoDB", "Azure Storage"],
     link: "https://drive.google.com/file/d/1RwmrTLIgRK6eUPNO9wGL_7vjRrexRFFJ/view",
     year: "2024",
@@ -43,7 +43,7 @@ const projects = [
   },
   {
     title: "SpeakUp",
-    description: "An AI-powered language coach using ChatGPT API with voice recording, transcribing, and pronunciation assessment features to help users improve their language skills.",
+    description: "A language coach built on the ChatGPT API, with voice recording, transcribing and pronunciation assessment to help users improve their language skills.",
     tech: ["Flutter", "ChatGPT API", "Firebase", "Speech Recognition", "AI/ML"],
     link: "https://drive.google.com/file/d/13bxZW8b5wFYTXoJLsIQQJRh-1YZa2dvT/view",
     year: "2024",
@@ -79,13 +79,13 @@ const skillGroups = [
   {
     icon: Gauge,
     title: "Performance Optimisation",
-    note: "Profiling startup, scrolling and memory so it stays smooth on mid-range Android",
+    note: "Profiling startup, scrolling and memory so it stays smooth on modest Android phones",
     skills: ["Render Profiling", "List Virtualisation", "Memory & Leak Tracing", "Startup Time", "Bundle & Asset Size", "Image Optimisation", "Jank Diagnosis"]
   },
   {
     icon: Sparkles,
     title: "Animations",
-    note: "Gesture-driven motion at 60 frames a second, showing what changed and where it came from",
+    note: "Motion that follows the gesture at 60 frames a second, showing what changed and where it came from",
     skills: ["Reanimated", "Gesture Handling", "Flutter Animations", "Shared Element Transitions", "Interruptible Motion", "60fps Budgets", "Reduced Motion"]
   },
   {
@@ -119,7 +119,7 @@ export default function MobileDev() {
       slug="/mobile"
       title="Mobile Development"
       intro="React Native and Flutter apps built end to end, from product thinking through realtime messaging, calls, performance and motion, all the way to the release pipeline."
-      tags={["React Native", "Flutter"]}
+      tags={["React Native", "Flutter", "Jetpack Compose", "SwiftUI"]}
     >
       <Section
         eyebrow="Selected Work"
@@ -129,10 +129,10 @@ export default function MobileDev() {
         <div className="space-y-4">
           {projects.map((project, idx) => (
             <div key={idx}
-              className="stagger-item group block p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+              className="stagger-item group block p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10">
               {project.image && <ProjectImage src={project.image} alt={project.title} />}
               <div className="flex items-center gap-4 mb-2">
-                <h4 className="text-2xl font-bold"><AnimatedText text={project.title} stagger={34} /></h4>
+                <h4 className="text-2xl font-bold">{project.title}</h4>
                 {project.isLive && (
                   <span className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
                     LIVE
@@ -140,7 +140,7 @@ export default function MobileDev() {
                 )}
                 {project.year && <span className="text-sm text-white/50">{project.year}</span>}
               </div>
-              <p className="text-white/70 leading-relaxed mb-4"><AnimatedText text={project.description} delay={200} stagger={6} /></p>
+              <p className="text-white/70 leading-relaxed mb-4">{project.description}</p>
               <div className="flex flex-wrap gap-2">
                 {project.tech.map((tech, i) => (
                   <span key={i} className="text-xs px-3 py-1 bg-black/60 border border-white/10 rounded-full text-white/60">

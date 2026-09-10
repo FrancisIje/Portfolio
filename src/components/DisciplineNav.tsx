@@ -9,7 +9,7 @@ const INDEX = (idx: number) => String(idx + 1).padStart(2, '0');
 
 export function DisciplineStrip({ slug }: { slug?: string }) {
   return (
-    <div className="flex overflow-x-auto no-scrollbar divide-x divide-white/10 md:grid md:grid-cols-6 md:overflow-visible">
+    <div className="grid grid-cols-5 divide-x divide-white/10">
       {disciplines.map((discipline, idx) => {
         const isActive = discipline.slug === slug;
         return (
@@ -17,19 +17,25 @@ export function DisciplineStrip({ slug }: { slug?: string }) {
             key={discipline.slug}
             href={discipline.slug}
             aria-current={isActive ? 'page' : undefined}
-            className={`group relative shrink-0 min-w-[9.5rem] md:min-w-0 px-4 py-3 transition-colors ${
+            // Five columns share the width at every size, so on a 320px phone a
+            // column is only ~64px. The padding has to stay small there or the
+            // longest label ("Platform") no longer has room on one line.
+            className={`group relative min-w-0 px-1 py-2 md:px-4 md:py-3 transition-colors ${
               isActive ? 'bg-white/[0.06]' : 'hover:bg-white/[0.06]'
             }`}
           >
             <span
-              className={`block text-[10px] leading-none tabular-nums mb-2 ${
+              className={`block text-[clamp(8px,2.2vw,10px)] leading-none tabular-nums mb-1 md:mb-2 ${
                 isActive ? 'text-white/60' : 'text-white/30'
               }`}
             >
               {INDEX(idx)}
             </span>
             <span
-              className={`block text-[11px] uppercase tracking-[0.18em] whitespace-nowrap transition-colors ${
+              // Wraps rather than running off the side, and the letterspacing
+              // that gives the strip its look is only affordable once there is
+              // width for it — at 320px it is what pushes "Platform" over.
+              className={`block text-[clamp(9px,2.6vw,11px)] uppercase leading-[1.3] tracking-[0.02em] md:tracking-[0.12em] transition-colors ${
                 isActive ? 'text-white' : 'text-white/60 group-hover:text-white'
               }`}
             >
@@ -58,7 +64,7 @@ export function SiteHeader({ slug }: { slug?: string }) {
             <span className="text-[15px] font-semibold tracking-tight">Francis</span>
           </a>
 
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-5">
             {disciplines.map((discipline) => {
               const isActive = discipline.slug === slug;
               return (
@@ -66,7 +72,7 @@ export function SiteHeader({ slug }: { slug?: string }) {
                   key={discipline.slug}
                   href={discipline.slug}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`text-[15px] whitespace-nowrap transition-colors ${
+                  className={`text-[14px] whitespace-nowrap transition-colors ${
                     isActive ? 'text-white' : 'text-white/70 hover:text-white'
                   }`}
                 >

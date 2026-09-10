@@ -1,4 +1,4 @@
-import { Smartphone, TrendingUp, Cloud, Server, Layout, Orbit } from 'lucide-react';
+import { Palette, Smartphone, Server, Layers, Terminal } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type Discipline = {
@@ -10,55 +10,56 @@ export type Discipline = {
   blurb: string;
 };
 
-// Single source of truth for the six discipline pages. Drives the home page
+// Single source of truth for the five discipline pages. Drives the home page
 // nav grid, the cross-page switcher in PageShell, and each page's background hue.
 export const disciplines: Discipline[] = [
+  {
+    slug: '/design-engineering',
+    hue: 265,
+    icon: Palette,
+    label: 'Design Eng',
+    title: 'Design Engineering',
+    blurb: 'Interface craft, motion and realtime graphics, from design tokens down to GLSL.',
+  },
   {
     slug: '/mobile',
     hue: 0,
     icon: Smartphone,
-    label: 'Mobile Dev',
+    label: 'Mobile',
     title: 'Mobile Development',
     blurb: 'React Native and Flutter apps, shipped to the App Store and Play Store.',
-  },
-  {
-    slug: '/gtm-engineering',
-    hue: 40,
-    icon: TrendingUp,
-    label: 'GTM Engineering',
-    title: 'GTM Engineering',
-    blurb: 'Automation, AI-powered workflows, growth tooling and the analytics behind them.',
-  },
-  {
-    slug: '/infrastructure',
-    hue: 190,
-    icon: Cloud,
-    label: 'Infrastructure',
-    title: 'Infrastructure Engineering',
-    blurb: 'Cloud architecture and deployment on GCP and Azure, with the CI/CD to match.',
   },
   {
     slug: '/backend',
     hue: 145,
     icon: Server,
     label: 'Backend',
-    title: 'Backend Engineering',
-    blurb: 'APIs, real-time systems and data layers in Node, Python, Go and Dart.',
+    title: 'Backend Architecture',
+    blurb: 'Service boundaries, data models and failure modes, decided before the code is written.',
   },
   {
-    slug: '/frontend',
-    hue: 265,
-    icon: Layout,
-    label: 'Frontend',
-    title: 'Frontend Engineering',
-    blurb: 'React and TypeScript interfaces built for speed, clarity and accessibility.',
+    slug: '/platform-engineering',
+    hue: 190,
+    icon: Layers,
+    label: 'Platform Eng',
+    title: 'Platform Engineering',
+    blurb: 'The cloud, network and delivery layer other engineers build on, across GCP and Azure.',
   },
   {
-    slug: '/webgl',
-    hue: 305,
-    icon: Orbit,
-    label: 'WebGL',
-    title: 'WebGL & Shaders',
-    blurb: 'GLSL, Three.js and real-time graphics on the open web.',
+    slug: '/devx',
+    hue: 40,
+    icon: Terminal,
+    label: 'DevX',
+    title: 'Developer Experience',
+    blurb: 'Tooling built on AI, agent infrastructure and the feedback loops around a codebase.',
   },
 ];
+
+// Slugs that used to exist, mapped to where their content lives now. Old links
+// and bookmarks land on the right page instead of the home hero.
+export const legacyRedirects: Record<string, string> = {
+  '/frontend': '/design-engineering',
+  '/webgl': '/design-engineering',
+  '/infrastructure': '/platform-engineering',
+  '/gtm-engineering': '/devx',
+};
