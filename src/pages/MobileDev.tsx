@@ -2,54 +2,8 @@ import React from 'react';
 import { ArrowUpRight, Smartphone, Lightbulb, Radio, Video, Gauge, Sparkles, Store } from 'lucide-react';
 import PageShell, { Section, SkillGroups } from '../components/PageShell';
 import { useParallax } from '../components/AnimatedText';
-import { ImageWithLoader } from '../../francis-portfolio';
-
-const projects = [
-  {
-    title: "Rojar",
-    description: "A social commerce marketplace where selling starts in minutes and buyers discover products through content. It has a social feed of posts and stories, seller storefronts, chat with voice notes for negotiating an order, and order tracking with secure payments.",
-    tech: ["Flutter", "WebSockets", "REST APIs", "Audio Recording", "Payments", "Push Notifications"],
-    isLive: true,
-    image: "/rojar.png",
-    appStoreLink: "https://apps.apple.com/ng/app/rojar/id6762018052",
-    playStoreLink: "https://play.google.com/store/apps/details?id=ng.com.rojar.app"
-  },
-  {
-    title: "Heala",
-    description: "An integrated healthcare platform that connects patients to doctors through chat, voice and video consultations. It also includes a symptom checker that ranks likely conditions, plus a personal health profile with daily activity tracking.",
-    tech: ["Flutter", "WebRTC", "WebSockets", "REST APIs", "Push Notifications"],
-    isLive: true,
-    image: "/heala.png",
-    appStoreLink: "https://apps.apple.com/ng/app/heala-integrated-healthcare/id1610943837",
-    playStoreLink: "https://play.google.com/store/apps/details?id=com.heala.patient"
-  },
-  {
-    title: "Bookaleap",
-    description: "Easily find and book top personal trainers, nutrition coaches, physiotherapists, and more wellness professionals with just a few clicks.",
-    tech: ["Flutter", "Dart", "Firebase", "REST APIs"],
-    year: "2024",
-    isLive: true,
-    image: "/bookaleap.png",
-    appStoreLink: "https://apps.apple.com/tr/app/bookaleap/id6447549852?platform=iphone",
-    playStoreLink: "https://play.google.com/store/apps/details?id=com.vebbuilders.bookleap&hl=en_US"
-  },
-  {
-    title: "Deeply Dating App",
-    description: "A complete mobile dating application with realtime messaging, profile matching, and media storage capabilities.",
-    tech: ["Flutter", "WebSockets", "Node.js", "MongoDB", "Azure Storage"],
-    link: "https://drive.google.com/file/d/1RwmrTLIgRK6eUPNO9wGL_7vjRrexRFFJ/view",
-    year: "2024",
-    image: "/dating-app.png"
-  },
-  {
-    title: "SpeakUp",
-    description: "A language coach built on the ChatGPT API, with voice recording, transcribing and pronunciation assessment to help users improve their language skills.",
-    tech: ["Flutter", "ChatGPT API", "Firebase", "Speech Recognition", "AI/ML"],
-    link: "https://drive.google.com/file/d/13bxZW8b5wFYTXoJLsIQQJRh-1YZa2dvT/view",
-    year: "2024",
-    image: "/speakup banner.png"
-  }
-];
+import ImageWithLoader from '../components/ImageWithLoader';
+import { projectsFor } from '../data/projects';
 
 const skillGroups = [
   {
@@ -101,7 +55,7 @@ const skillGroups = [
 function ProjectImage({ src, alt }: { src: string; alt: string }) {
   const ref = useParallax<HTMLDivElement>(-0.06);
   return (
-    <div className="mb-6 overflow-hidden rounded-xl bg-white/5 flex items-center justify-center p-4">
+    <div className="mb-6 overflow-hidden rounded-xl bg-white/70 flex items-center justify-center p-4">
       <div ref={ref} className="w-full flex items-center justify-center will-change-transform">
         <ImageWithLoader
           src={src}
@@ -127,23 +81,23 @@ export default function MobileDev() {
         lede="Production apps, each with a different hard part: live consultations, booking flows, realtime messaging and speech AI."
       >
         <div className="space-y-4">
-          {projects.map((project, idx) => (
+          {projectsFor('/mobile').map((project, idx) => (
             <div key={idx}
-              className="stagger-item group block p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10">
+              className="stagger-item group block p-8 bg-white/70 backdrop-blur-sm border border-ink/10 rounded-2xl hover:bg-white">
               {project.image && <ProjectImage src={project.image} alt={project.title} />}
               <div className="flex items-center gap-4 mb-2">
-                <h4 className="text-2xl font-bold">{project.title}</h4>
+                <h4 className="text-xl font-semibold">{project.title}</h4>
                 {project.isLive && (
-                  <span className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
+                  <span className="text-xs px-3 py-1 bg-green-500/10 text-green-700 rounded-full border border-green-500/30">
                     LIVE
                   </span>
                 )}
-                {project.year && <span className="text-sm text-white/50">{project.year}</span>}
+                {project.year && <span className="text-sm text-ink/50">{project.year}</span>}
               </div>
-              <p className="text-white/70 leading-relaxed mb-4">{project.description}</p>
+              <p className="text-ink/70 leading-relaxed mb-4">{project.description}</p>
               <div className="flex flex-wrap gap-2">
                 {project.tech.map((tech, i) => (
-                  <span key={i} className="text-xs px-3 py-1 bg-black/60 border border-white/10 rounded-full text-white/60">
+                  <span key={i} className="text-xs px-3 py-1 bg-paper border border-ink/10 rounded-full text-ink/60">
                     {tech}
                   </span>
                 ))}
@@ -152,14 +106,14 @@ export default function MobileDev() {
                 <div className="flex gap-3 mt-4">
                   {project.appStoreLink && (
                     <a href={project.appStoreLink} target="_blank" rel="noopener noreferrer"
-                      className="text-xs px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 transition-all flex items-center gap-2">
+                      className="text-xs px-4 py-2 bg-ink/10 hover:bg-ink/20 text-ink rounded-full border border-ink/20 transition-all flex items-center gap-2">
                       <span>App Store</span>
                       <ArrowUpRight className="w-3 h-3" />
                     </a>
                   )}
                   {project.playStoreLink && (
                     <a href={project.playStoreLink} target="_blank" rel="noopener noreferrer"
-                      className="text-xs px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 transition-all flex items-center gap-2">
+                      className="text-xs px-4 py-2 bg-ink/10 hover:bg-ink/20 text-ink rounded-full border border-ink/20 transition-all flex items-center gap-2">
                       <span>Play Store</span>
                       <ArrowUpRight className="w-3 h-3" />
                     </a>
@@ -168,7 +122,7 @@ export default function MobileDev() {
               )}
               {project.link && !project.appStoreLink && !project.playStoreLink && (
                 <a href={project.link} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white mt-4 transition-colors">
+                  className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink mt-4 transition-colors">
                   <span>View Project</span>
                   <ArrowUpRight className="w-4 h-4" />
                 </a>

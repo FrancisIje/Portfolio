@@ -4,9 +4,10 @@ import Portfolio from '../francis-portfolio'
 import DesignEngineering from './pages/DesignEngineering'
 import MobileDev from './pages/MobileDev'
 import Backend from './pages/Backend'
-import PlatformEngineering from './pages/PlatformEngineering'
 import DevX from './pages/DevX'
 import { legacyRedirects } from './data/disciplines'
+import IntroLoader from './components/IntroLoader'
+import SiteBackground from './components/SiteBackground'
 import BlockReveal, {
   BLOCK_REVEAL_COVER_MS,
   BLOCK_REVEAL_UNCOVER_MS,
@@ -18,7 +19,6 @@ const routes = {
   '/design-engineering': DesignEngineering,
   '/mobile': MobileDev,
   '/backend': Backend,
-  '/platform-engineering': PlatformEngineering,
   '/devx': DevX,
 }
 
@@ -97,8 +97,12 @@ function App() {
 
   return (
     <>
+      {/* Mounted once, outside the routes, so the field carries on across a
+          page change instead of being torn down and repopulated each time */}
+      <SiteBackground />
       {Page ? <Page /> : <Portfolio />}
       <BlockReveal phase={phase} />
+      <IntroLoader />
     </>
   )
 }

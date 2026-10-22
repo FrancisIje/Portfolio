@@ -1,10 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
-// Character-by-character reveal. Each letter sits in its own overflow-hidden box
-// and rises into it, staggered, so a heading types itself into place. Letters
-// are grouped per word so a word never breaks across a line, with real space
-// characters between words so the text still copies and reads correctly.
-// Newlines in `text` become line breaks.
+// Character-by-character reveal. Each word is an overflow-hidden box and its
+// letters rise into it, staggered, so a heading types itself into place. Words
+// never break across a line, and real space characters sit between them so the
+// text still copies and reads correctly. Newlines in `text` become line breaks.
+//
+// One element per letter, built once: the reveal is a class added straight to
+// the DOM rather than state, so it never re-renders the letters. Pages carry
+// several hundred of them, and in development every element React creates
+// costs a stack capture, which is what used to stall page transitions.
 export default function AnimatedText({
   text,
   delay = 0,
@@ -17,21 +21,27 @@ export default function AnimatedText({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [revealed, setRevealed] = useState(false);
+  // Kept in the className too, so a parent re-render cannot strip it again
+  const revealedRef = useRef(false);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
 
+    const reveal = () => {
+      revealedRef.current = true;
+      node.classList.add('is-revealed');
+    };
+
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setRevealed(true);
+      reveal();
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setRevealed(true);
+          reveal();
           observer.disconnect();
         }
       },
@@ -41,39 +51,41 @@ export default function AnimatedText({
     return () => observer.disconnect();
   }, []);
 
-  let index = 0;
+  const letters = useMemo(() => {
+    let index = 0;
+    return text.split('\n').map((line, lineIndex) => {
+      const words = line.split(' ');
+      return (
+        <span key={lineIndex} className="animated-text__line">
+          {words.map((word, wordIndex) => (
+            <React.Fragment key={wordIndex}>
+              <span className="animated-text__word">
+                {Array.from(word).map((character, charIndex) => (
+                  <span
+                    key={charIndex}
+                    className="animated-text__char"
+                    style={{ transitionDelay: `${delay + index++ * stagger}ms` }}
+                  >
+                    {character}
+                  </span>
+                ))}
+              </span>
+              {/* A real space, so the text copies and reads as words rather
+                  than one run-together string. The gap is not CSS margin. */}
+              {wordIndex < words.length - 1 ? ' ' : null}
+            </React.Fragment>
+          ))}
+        </span>
+      );
+    });
+  }, [text, delay, stagger]);
 
   return (
     <span
       ref={ref}
-      className={`animated-text${revealed ? ' is-revealed' : ''}${className ? ` ${className}` : ''}`}
+      className={`animated-text${revealedRef.current ? ' is-revealed' : ''}${className ? ` ${className}` : ''}`}
     >
-      {text.split('\n').map((line, lineIndex) => (
-        <span key={lineIndex} className="animated-text__line">
-          {line.split(' ').map((word, wordIndex) => (
-            <React.Fragment key={wordIndex}>
-              <span className="animated-text__word">
-                {Array.from(word).map((character, charIndex) => {
-                  const order = index++;
-                  return (
-                    <span key={charIndex} className="animated-text__char">
-                      <span
-                        className="animated-text__inner"
-                        style={{ transitionDelay: `${delay + order * stagger}ms` }}
-                      >
-                        {character}
-                      </span>
-                    </span>
-                  );
-                })}
-              </span>
-              {/* A real space, so the text copies and reads as words rather
-                  than one run-together string. The gap is not CSS margin. */}
-              {wordIndex < line.split(' ').length - 1 ? ' ' : null}
-            </React.Fragment>
-          ))}
-        </span>
-      ))}
+      {letters}
     </span>
   );
 }

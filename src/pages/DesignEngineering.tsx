@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layout, Palette, Sparkles, Code2, Orbit, Gauge, Accessibility, Package } from 'lucide-react';
-import PageShell, { Section, SkillGroups, CardGrid } from '../components/PageShell';
+import PageShell, { Section, SkillGroups, CardGrid, ProjectFeatures } from '../components/PageShell';
+import { projectsFor } from '../data/projects';
 
 const approach = [
   {
@@ -24,7 +25,7 @@ const approach = [
 const work = [
   {
     title: "The background on this site",
-    body: "A raw WebGL fragment shader running organic blob motion behind every page. No library, no video, just one fullscreen quad and a GLSL program. It resizes with the window and costs a fraction of what an equivalent looping video would."
+    body: "Generative marks after Okazz's hexagon sketches, popping up and fading away on a hex lattice behind every page, with the loader and page transitions drawn from the same palette. Plain Canvas 2D, no library and no video: it pauses in background tabs and holds still for reduced motion."
   },
   {
     title: "Procedural over asset-heavy",
@@ -107,6 +108,13 @@ export default function DesignEngineering() {
       intro="The seam between design and engineering: interface systems, motion and realtime graphics, built in the browser rather than handed over it. Including the page you're reading right now."
       tags={["React", "TypeScript", "Design Systems", "Motion", "GLSL", "WebGL"]}
     >
+      <Section
+        eyebrow="Selected Work"
+        heading="Shipped and in use"
+      >
+        <ProjectFeatures projects={projectsFor('/design-engineering')} slug="/design-engineering" />
+      </Section>
+
       <Section
         eyebrow="Approach"
         heading="How I work at the seam"

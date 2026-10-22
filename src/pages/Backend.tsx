@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layers, Database, FileCode, Radio, ShieldCheck, Server } from 'lucide-react';
-import PageShell, { Section, SkillGroups, CardGrid } from '../components/PageShell';
+import PageShell, { Section, SkillGroups, CardGrid, ProjectFeatures } from '../components/PageShell';
+import { projectsFor } from '../data/projects';
 
 const approach = [
   {
@@ -76,6 +77,13 @@ export default function Backend() {
       intro="Service boundaries, data models, delivery guarantees and failure modes: the decisions made before the first handler is written, and the ones that are expensive to change afterwards."
       tags={["System Design", "PostgreSQL", "Event-Driven", "Node.js", "Python", "Go"]}
     >
+      <Section
+        eyebrow="Selected Work"
+        heading="Shipped and in use"
+      >
+        <ProjectFeatures projects={projectsFor('/backend')} slug="/backend" />
+      </Section>
+
       <Section
         eyebrow="Approach"
         heading="Decisions that are expensive to reverse"

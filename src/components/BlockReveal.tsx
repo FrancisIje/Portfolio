@@ -1,74 +1,99 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { GLYPH_PALETTE } from '../effects/okazz/glyphs';
 
-// A grid of small tiles that fill the viewport. On cover they pop in one by one
-// in random order until the outgoing page is hidden; the route swaps behind
-// them; on reveal they drop away in a fresh random order, slowly uncovering the
-// new page. Durations here are re-exported for main.tsx to schedule the swap.
-const TILE_PX = 48;
+// Page transition: a wave of solid palette squares sweeps diagonally across the
+// viewport, each one growing from its centre until the outgoing page is
+// covered; the route swaps behind them; then they shrink away along the same
+// diagonal to uncover the new page. Drawn on one canvas rather than hundreds of
+// DOM tiles, and scaled rather than faded, so no tile is ever half transparent
+// over the copy. Durations here are re-exported for main.tsx to schedule the swap.
+const TILE_PX = 64;
 
-const COVER_TILE_MS = 260;
-const COVER_SPREAD_MS = 620;
-const UNCOVER_TILE_MS = 300;
-const UNCOVER_SPREAD_MS = 980;
+const COVER_TILE_MS = 200;
+const COVER_SPREAD_MS = 260;
+const UNCOVER_TILE_MS = 220;
+const UNCOVER_SPREAD_MS = 320;
+// Random wobble on each tile's place in the wave, as a share of the spread
+const JITTER = 0.18;
 
 export const BLOCK_REVEAL_COVER_MS = COVER_TILE_MS + COVER_SPREAD_MS;
 export const BLOCK_REVEAL_UNCOVER_MS = UNCOVER_TILE_MS + UNCOVER_SPREAD_MS;
 
 export type BlockRevealPhase = 'idle' | 'cover' | 'reveal';
 
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeInCubic = (t: number) => t * t * t;
+
 export default function BlockReveal({ phase }: { phase: BlockRevealPhase }) {
+  // Stays mounted from cover through reveal so the canvas, and the colours on
+  // it, carry straight across the route swap without a blank frame between.
   if (phase === 'idle') return null;
-  // Keyed by phase so each phase remounts: the animation replays from the start
-  // and the tile order is reshuffled, so no two sweeps look the same.
-  return <BlockRevealGrid key={phase} phase={phase} />;
+  return <BlockRevealCanvas phase={phase} />;
 }
 
-function BlockRevealGrid({ phase }: { phase: 'cover' | 'reveal' }) {
-  const { columns, rows, position, headerHeight } = useMemo(() => {
-    // The header is translucent, so tiles behind it would still show through.
-    // Start the grid underneath it instead and leave it out of the transition.
-    const header = document.querySelector('[data-site-header]');
-    const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
+function BlockRevealCanvas({ phase }: { phase: 'cover' | 'reveal' }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gridRef = useRef<{ cols: number; rows: number; colours: string[]; order: number[] } | null>(null);
 
-    const columns = Math.max(1, Math.ceil(window.innerWidth / TILE_PX));
-    const rows = Math.max(1, Math.ceil((window.innerHeight - headerHeight) / TILE_PX));
-    const total = columns * rows;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
 
-    // Fisher-Yates: position[tile] is where that tile falls in the sequence,
-    // which becomes its delay. Random order, every tile used exactly once.
-    const shuffled = Array.from({ length: total }, (_, i) => i);
-    for (let i = total - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (canvas.width !== Math.round(width * dpr)) {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
     }
-    const position = new Array<number>(total);
-    shuffled.forEach((tile, order) => {
-      position[tile] = order;
-    });
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    return { columns, rows, position, headerHeight };
-  }, []);
+    // One grid for the whole transition, built on cover
+    if (!gridRef.current) {
+      const cols = Math.ceil(width / TILE_PX);
+      const rows = Math.ceil(height / TILE_PX);
+      const colours: string[] = [];
+      const order: number[] = [];
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          colours.push(GLYPH_PALETTE[Math.floor(Math.random() * GLYPH_PALETTE.length)]);
+          // 0..1 position along the top-left to bottom-right diagonal, wobbled
+          const diagonal = (col + row) / Math.max(1, cols + rows - 2);
+          order.push(Math.min(1, Math.max(0, diagonal * (1 - JITTER) + Math.random() * JITTER)));
+        }
+      }
+      gridRef.current = { cols, rows, colours, order };
+    }
+    const { cols, colours, order } = gridRef.current;
 
-  const total = columns * rows;
-  const spread = phase === 'cover' ? COVER_SPREAD_MS : UNCOVER_SPREAD_MS;
+    const tileMs = phase === 'cover' ? COVER_TILE_MS : UNCOVER_TILE_MS;
+    const spread = phase === 'cover' ? COVER_SPREAD_MS : UNCOVER_SPREAD_MS;
+    const start = performance.now();
+    let frame = 0;
 
-  return (
-    <div
-      className="block-reveal"
-      aria-hidden="true"
-      style={{
-        top: headerHeight,
-        gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gridTemplateRows: `repeat(${rows}, 1fr)`,
-      }}
-    >
-      {Array.from({ length: total }).map((_, i) => (
-        <span
-          key={i}
-          className={`block-reveal__tile block-reveal__tile--${phase}`}
-          style={{ animationDelay: `${(position[i] / total) * spread}ms` }}
-        />
-      ))}
-    </div>
-  );
+    const draw = (now: number) => {
+      const elapsed = now - start;
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < colours.length; i++) {
+        const t = Math.min(1, Math.max(0, (elapsed - order[i] * spread) / tileMs));
+        const scale = phase === 'cover' ? easeOutCubic(t) : 1 - easeInCubic(t);
+        if (scale <= 0) continue;
+        const col = i % cols;
+        const row = (i - col) / cols;
+        // Half a pixel of bleed each side so neighbours meet with no seam
+        const size = (TILE_PX + 1) * scale;
+        const cx = col * TILE_PX + TILE_PX / 2;
+        const cy = row * TILE_PX + TILE_PX / 2;
+        ctx.fillStyle = colours[i];
+        ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+      }
+      if (elapsed < spread + tileMs) frame = requestAnimationFrame(draw);
+    };
+    frame = requestAnimationFrame(draw);
+
+    return () => cancelAnimationFrame(frame);
+  }, [phase]);
+
+  return <canvas ref={canvasRef} className="block-reveal" aria-hidden="true" />;
 }
