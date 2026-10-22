@@ -1,774 +1,312 @@
-// SAMPLE 1 : BACKGROUND WITH PROCEDURAL GRAYSCALE FLOWING SHADER
-
-// import React, { useState, useEffect, useRef } from 'react';
-// import { Github, Linkedin, Mail, ExternalLink, Code2, Smartphone, Database, Terminal } from 'lucide-react';
-
-// function ShaderBackground() {
-//   const canvasRef = useRef(null);
-
-//   useEffect(() => {
-//     const canvas = canvasRef.current;
-//     if (!canvas) return;
-
-//     const gl = canvas.getContext('webgl');
-//     if (!gl) return;
-
-//     // Set canvas size
-//     const setSize = () => {
-//       canvas.width = window.innerWidth;
-//       canvas.height = window.innerHeight;
-//       gl.viewport(0, 0, canvas.width, canvas.height);
-//     };
-//     setSize();
-//     window.addEventListener('resize', setSize);
-
-//     // Vertex shader
-//     const vertexShaderSource = `
-//       attribute vec2 position;
-//       void main() {
-//         gl_Position = vec4(position, 0.0, 1.0);
-//       }
-//     `;
-
-//     // Fragment shader with flowing gradients
-//     const fragmentShaderSource = `
-//       precision mediump float;
-//       uniform float u_time;
-//       uniform vec2 u_resolution;
-//       uniform vec2 u_mouse;
-
-//       vec3 palette(float t) {
-//         // Pure grayscale palette - black to white
-//         float gray = 0.5 + 0.5 * cos(6.28318 * t);
-//         return vec3(gray);
-//       }
-
-//       void main() {
-//         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution) / u_resolution.y;
-//         vec2 uv0 = uv;
-//         vec3 finalColor = vec3(0.0);
-
-//         for (float i = 0.0; i < 4.0; i++) {
-//           uv = fract(uv * 1.5) - 0.5;
-
-//           float d = length(uv) * exp(-length(uv0));
-//           vec3 col = palette(length(uv0) + i * 0.4 + u_time * 0.4);
-
-//           d = sin(d * 8.0 + u_time) / 8.0;
-//           d = abs(d);
-//           d = pow(0.01 / d, 1.2);
-
-//           finalColor += col * d;
-//         }
-
-//         // Mix with mouse position for interactivity
-//         float mouseInfluence = length(uv - u_mouse * 2.0);
-//         finalColor *= 0.8 + 0.2 * sin(mouseInfluence * 3.0 - u_time);
-
-//         gl_FragColor = vec4(finalColor * 0.03, 1.0);
-//       }
-//     `;
-
-//     // Compile shader
-//     function createShader(gl, type, source) {
-//       const shader = gl.createShader(type);
-//       gl.shaderSource(shader, source);
-//       gl.compileShader(shader);
-//       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-//         console.error(gl.getShaderInfoLog(shader));
-//         gl.deleteShader(shader);
-//         return null;
-//       }
-//       return shader;
-//     }
-
-//     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-//     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-//     if (!vertexShader || !fragmentShader) {
-//       console.error('Failed to create shaders');
-//       return;
-//     }
-
-//     // Create program
-//     const program = gl.createProgram();
-//     if (!program) {
-//       console.error('Failed to create program');
-//       return;
-//     }
-
-//     gl.attachShader(program, vertexShader);
-//     gl.attachShader(program, fragmentShader);
-//     gl.linkProgram(program);
-
-//     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-//       console.error('Program link error:', gl.getProgramInfoLog(program));
-//       gl.deleteProgram(program);
-//       return;
-//     }
-
-//     // Validate program
-//     gl.validateProgram(program);
-//     if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-//       console.error('Program validation error:', gl.getProgramInfoLog(program));
-//     }
-
-//     gl.useProgram(program);
-
-//     // Setup geometry
-//     const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-//     const buffer = gl.createBuffer();
-//     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-//     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-//     const positionLocation = gl.getAttribLocation(program, 'position');
-//     gl.enableVertexAttribArray(positionLocation);
-//     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-//     // Get uniform locations
-//     const timeLocation = gl.getUniformLocation(program, 'u_time');
-//     const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-//     const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
-
-//     let mouseX = 0.5;
-//     let mouseY = 0.5;
-
-//     const handleMouseMove = (e) => {
-//       mouseX = e.clientX / window.innerWidth;
-//       mouseY = 1.0 - e.clientY / window.innerHeight;
-//     };
-
-//     window.addEventListener('mousemove', handleMouseMove);
-
-//     // Animation loop
-//     let startTime = Date.now();
-//     function render() {
-//       const currentTime = (Date.now() - startTime) * 0.001;
-
-//       // Ensure the program is still bound
-//       gl.useProgram(program);
-
-//       // Only set uniforms if their locations are valid
-//       if (timeLocation !== null) {
-//         gl.uniform1f(timeLocation, currentTime);
-//       }
-//       if (resolutionLocation !== null) {
-//         gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
-//       }
-//       if (mouseLocation !== null) {
-//         gl.uniform2f(mouseLocation, mouseX, mouseY);
-//       }
-
-//       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-//       requestAnimationFrame(render);
-//     }
-//     render();
-
-//     return () => {
-//       window.removeEventListener('resize', setSize);
-//       window.removeEventListener('mousemove', handleMouseMove);
-//     };
-//   }, []);
-
-//   return (
-//     <canvas
-//       ref={canvasRef}
-//       className="fixed inset-0 w-full h-full"
-//       style={{ zIndex: 0, opacity: 0.3 }}
-//     />
-//   );
-// }
-
-// export default function Portfolio() {
-//   const [activeSection, setActiveSection] = useState('home');
-//   const [isVisible, setIsVisible] = useState(false);
-
-//   useEffect(() => {
-//     setIsVisible(true);
-//   }, []);
-
-//   const mobileProjects = [
-//     {
-//       title: "Meditation App",
-//       description: "A user-centric mobile application designed to enhance mindfulness and meditation practices. Built with a focus on intuitive UX and calming interface design.",
-//       tech: ["Flutter", "Dart", "Firebase"],
-//       link: "#"
-//     },
-//     {
-//       title: "Cross-Platform Mobile App",
-//       description: "Developed robust iOS and Android applications with seamless performance and native-like user experiences.",
-//       tech: ["React Native", "JavaScript", "REST APIs"],
-//       link: "#"
-//     },
-//     {
-//       title: "Native Mobile Solution",
-//       description: "Built high-performance native applications with smooth animations and optimized resource management.",
-//       tech: ["Flutter", "Dart", "SQLite"],
-//       link: "#"
-//     }
-//   ];
-
-//   const webGLSLProjects = [
-//     {
-//       title: "Interactive WebGL Experience",
-//       description: "Created immersive web experiences using WebGL and custom GLSL shaders for stunning visual effects.",
-//       tech: ["WebGL", "GLSL", "JavaScript"],
-//       link: "#"
-//     },
-//     {
-//       title: "Shader Art Gallery",
-//       description: "Developed a collection of procedural graphics and shader-based animations showcasing creative coding techniques.",
-//       tech: ["GLSL", "Three.js", "React"],
-//       link: "#"
-//     },
-//     {
-//       title: "Web Portfolio Projects",
-//       description: "Built responsive web applications with modern frameworks and interactive user interfaces.",
-//       tech: ["React", "JavaScript", "CSS"],
-//       link: "#"
-//     }
-//   ];
-
-//   const skills = [
-//     { name: "Dart", icon: <Code2 className="w-5 h-5" />, level: 90 },
-//     { name: "JavaScript", icon: <Terminal className="w-5 h-5" />, level: 85 },
-//     { name: "Python", icon: <Database className="w-5 h-5" />, level: 80 },
-//     { name: "C", icon: <Code2 className="w-5 h-5" />, level: 75 },
-//     { name: "Mobile Dev", icon: <Smartphone className="w-5 h-5" />, level: 90 }
-//   ];
-
-//   const scrollToSection = (section) => {
-//     setActiveSection(section);
-//     document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-[#0a0a0a] text-white relative" style={{ fontFamily: '"Claude", Charter, system-ui, -apple-system, sans-serif' }}>
-//       {/* WebGL Shader Background */}
-//       <ShaderBackground />
-
-//       {/* Content wrapper */}
-//       <div className="relative z-10">
-//         {/* Navigation */}
-//         <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-[#2a2a2a]">
-//           <div className="max-w-6xl mx-auto px-6 py-4">
-//             <div className="flex items-center justify-between">
-//               <div className="text-xl font-semibold tracking-tight hidden md:block">Francis Ije</div>
-//               <div className="flex gap-8">
-//                 {['home', 'about', 'projects', 'skills', 'contact'].map((section) => (
-//                   <button
-//                     key={section}
-//                     onClick={() => scrollToSection(section)}
-//                     className={`capitalize transition-colors hover:text-white ${
-//                       activeSection === section ? 'text-white' : 'text-[#a0a0a0]'
-//                     }`}
-//                   >
-//                     {section}
-//                   </button>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-//         </nav>
-
-//         {/* Hero Section */}
-//         <section id="home" className="min-h-screen flex items-center justify-center px-6 pt-20">
-//           <div className={`max-w-4xl text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-//             <h1 className="text-6xl font-bold mb-6 tracking-tight">
-//               Francis Ijenebe
-//             </h1>
-//             <div className="text-3xl text-[#b0b0b0] mb-8 font-mono">
-//               MOBILE + WEB + GLSL
-//             </div>
-//             <p className="text-xl text-[#a0a0a0] mb-12 leading-relaxed">
-//               Building performant, shader-driven experiences that blend art with utility.
-//             </p>
-//             <div className="flex gap-4 justify-center">
-//               <a href="https://github.com/FrancisIje" target="_blank" rel="noopener noreferrer" 
-//                  className="p-3 rounded-full bg-[#2a2a2a]/60 backdrop-blur-sm hover:bg-[#3a3a3a] transition-colors">
-//                 <Github className="w-6 h-6" />
-//               </a>
-//               <a href="mailto:contact@francisije.com" 
-//                  className="p-3 rounded-full bg-[#2a2a2a]/60 backdrop-blur-sm hover:bg-[#3a3a3a] transition-colors">
-//                 <Mail className="w-6 h-6" />
-//               </a>
-//               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
-//                  className="p-3 rounded-full bg-[#2a2a2a]/60 backdrop-blur-sm hover:bg-[#3a3a3a] transition-colors">
-//                 <Linkedin className="w-6 h-6" />
-//               </a>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* About Section */}
-//         <section id="about" className="min-h-screen flex items-center justify-center px-6 py-20">
-//           <div className="max-w-4xl w-full">
-//             <h2 className="text-4xl font-bold mb-12 tracking-tight">About Me</h2>
-//             <div className="bg-[#1a1a1a]/60 backdrop-blur-sm rounded-lg p-8 border border-[#3a3a3a]">
-//               <div className="space-y-6 text-lg text-[#b0b0b0] leading-relaxed">
-//                 <p>
-//                  I’m a developer who sits at the intersection of graphics and product: shipping mobile and web apps while building custom GLSL shaders and interactive visuals. I focus on performance, polished UX, and creative code — turning ideas into responsive, memorable experiences. Whether it’s a production mobile app or a shader-driven web demo, I love solving hard engineering problems and making interfaces sing.
-//                 </p>
-//                 <p>
-//                   Known for my collaborative spirit, tech enthusiasm, and commitment to continuous learning. 
-//                   Currently exploring new technologies and building solutions that make a difference.
-//                 </p>
-//                 <p>
-//                   Beyond coding, I enjoy music and believe in the power of technology to bring people together 
-//                   and solve real-world problems.
-//                 </p>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Projects Section */}
-//         <section id="projects" className="min-h-screen flex items-center justify-center px-6 py-20">
-//           <div className="max-w-6xl w-full">
-//             <h2 className="text-4xl font-bold mb-16 tracking-tight">Projects</h2>
-            
-//             {/* Mobile Development Projects */}
-//             <div className="mb-16">
-//               <div className="flex items-center gap-3 mb-8">
-//                 <Smartphone className="w-7 h-7 text-[#888]" />
-//                 <h3 className="text-2xl font-semibold">Mobile Development</h3>
-//               </div>
-//               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-//                 {mobileProjects.map((project, idx) => (
-//                   <div key={idx} className="bg-[#1a1a1a]/60 backdrop-blur-sm rounded-lg p-6 hover:bg-[#2a2a2a]/60 transition-all duration-300 border border-[#3a3a3a]">
-//                     <div className="flex items-start justify-between mb-4">
-//                       <Smartphone className="w-8 h-8 text-[#888]" />
-//                       <a href={project.link} className="text-[#888] hover:text-white transition-colors">
-//                         <ExternalLink className="w-5 h-5" />
-//                       </a>
-//                     </div>
-//                     <h3 className="text-xl font-semibold mb-3">{project.title}</h3>
-//                     <p className="text-[#b0b0b0] mb-4 leading-relaxed">{project.description}</p>
-//                     <div className="flex flex-wrap gap-2">
-//                       {project.tech.map((tech, i) => (
-//                         <span key={i} className="text-sm px-3 py-1 bg-[#0a0a0a]/60 rounded-full text-[#a0a0a0]">
-//                           {tech}
-//                         </span>
-//                       ))}
-//                     </div>
-//                   </div>
-//                 ))}
-//               </div>
-//             </div>
-
-//             {/* Web & GLSL Projects */}
-//             <div>
-//               <div className="flex items-center gap-3 mb-8">
-//                 <Code2 className="w-7 h-7 text-[#888]" />
-//                 <h3 className="text-2xl font-semibold">Web & GLSL</h3>
-//               </div>
-//               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-//                 {webGLSLProjects.map((project, idx) => (
-//                   <div key={idx} className="bg-[#1a1a1a]/60 backdrop-blur-sm rounded-lg p-6 hover:bg-[#2a2a2a]/60 transition-all duration-300 border border-[#3a3a3a]">
-//                     <div className="flex items-start justify-between mb-4">
-//                       <Code2 className="w-8 h-8 text-[#888]" />
-//                       <a href={project.link} className="text-[#888] hover:text-white transition-colors">
-//                         <ExternalLink className="w-5 h-5" />
-//                       </a>
-//                     </div>
-//                     <h3 className="text-xl font-semibold mb-3">{project.title}</h3>
-//                     <p className="text-[#b0b0b0] mb-4 leading-relaxed">{project.description}</p>
-//                     <div className="flex flex-wrap gap-2">
-//                       {project.tech.map((tech, i) => (
-//                         <span key={i} className="text-sm px-3 py-1 bg-[#0a0a0a]/60 rounded-full text-[#a0a0a0]">
-//                           {tech}
-//                         </span>
-//                       ))}
-//                     </div>
-//                   </div>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Skills Section */}
-//         <section id="skills" className="min-h-screen flex items-center justify-center px-6 py-20">
-//           <div className="max-w-4xl w-full">
-//             <h2 className="text-4xl font-bold mb-12 tracking-tight">Skills</h2>
-//             <div className="bg-[#1a1a1a]/60 backdrop-blur-sm rounded-lg p-8 border border-[#3a3a3a]">
-//               <div className="space-y-6">
-//                 {skills.map((skill, idx) => (
-//                   <div key={idx} className="flex items-center gap-3">
-//                     {skill.icon}
-//                     <span className="text-lg font-medium">{skill.name}</span>
-//                   </div>
-//                 ))}
-//               </div>
-//               <div className="mt-8 p-6 bg-[#0a0a0a]/60 rounded-lg border border-[#2a2a2a]">
-//                 <p className="text-lg text-[#b0b0b0] italic">
-//                   "learning new stuff" - Always exploring, always growing
-//                 </p>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Contact Section */}
-//         <section id="contact" className="min-h-screen flex items-center justify-center px-6 py-20">
-//           <div className="max-w-2xl text-center">
-//             <h2 className="text-4xl font-bold mb-8 tracking-tight">Let's Connect</h2>
-//             <p className="text-xl text-[#b0b0b0] mb-12 leading-relaxed">
-//               Interested in collaborating or just want to say hi? Feel free to reach out.
-//             </p>
-//             <div className="flex flex-col gap-4 items-center">
-//               <a href="mailto:contact@francisije.com" 
-//                  className="flex items-center gap-3 px-8 py-4 bg-[#2a2a2a]/60 backdrop-blur-sm hover:bg-[#3a3a3a] rounded-lg transition-all">
-//                 <Mail className="w-5 h-5" />
-//                 <span className="text-lg">Get in Touch</span>
-//               </a>
-//               <div className="flex gap-6 mt-6">
-//                 <a href="https://github.com/FrancisIje" target="_blank" rel="noopener noreferrer"
-//                    className="text-[#888] hover:text-white transition-colors flex items-center gap-2">
-//                   <Github className="w-5 h-5" />
-//                   <span>GitHub</span>
-//                 </a>
-//                 <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
-//                    className="text-[#888] hover:text-white transition-colors flex items-center gap-2">
-//                   <Linkedin className="w-5 h-5" />
-//                   <span>LinkedIn</span>
-//                 </a>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Footer */}
-//         <footer className="border-t border-[#2a2a2a] py-8 px-6">
-//           <div className="max-w-6xl mx-auto text-center text-[#888]">
-//             <p>© 2026 Francis Ije. Built with React.</p>
-//           </div>
-//         </footer>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-// SAMPLE 2 : BACKGROUND WITH ORGANIC MOVING BLOBS SHADER
-
-import React, { useState, useEffect, useRef } from 'react';
-import SiteBackground from './src/components/SiteBackground';
+import React, { useRef, useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
+import SiteFooter, { CopyEmail } from './src/components/SiteFooter';
+import ImageWithLoader from './src/components/ImageWithLoader';
 import { SiteHeader } from './src/components/DisciplineNav';
-import AnimatedText from './src/components/AnimatedText';
+import { useStaggerReveal } from './src/components/useStaggerReveal';
+import GlyphGrid from './src/effects/okazz/GlyphGrid';
+import { disciplines } from './src/data/disciplines';
+import { projects, projectHref, type Project } from './src/data/projects';
 
-export function ImageWithLoader({ src, alt, className }: { src: string; alt: string; className?: string }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+type Audience = {
+  label: string;
+  lead: string;
+  mark: string;
+  tail: string;
+  sub: string;
+};
 
-  const handleLoad = () => {
-    // Add artificial delay in development to see the loading animation
-    const isDev = import.meta.env.DEV;
-    const delay = isDev ? 2000 : 0; // 2 second delay in dev mode
-    
-    setTimeout(() => {
-      setIsLoading(false);
-    }, delay);
-  };
+// The hero headline, rewritten for whoever is reading. "Machines" gets the same
+// facts as structured data instead.
+const audiences: Audience[] = [
+  {
+    label: 'For everyone',
+    lead: "Hi there, I'm Francis. I ",
+    mark: 'design and ship software',
+    tail: ' end to end, from the app in your hand to the backend behind it.',
+    sub: 'Mobile apps, the interfaces around them, the backend architecture underneath, and the developer tooling that keeps it all moving.',
+  },
+  {
+    label: 'Recruiters',
+    lead: "I've shipped ",
+    mark: 'production apps on both stores',
+    tail: ' across healthcare, commerce and wellness, and I own the backend work behind them.',
+    sub: 'Flutter and React Native, React and TypeScript, Node.js services, CI/CD. Happy to send a CV: the email is one click below.',
+  },
+  {
+    label: 'Designers',
+    lead: 'I work at the seam: ',
+    mark: 'designing in the browser',
+    tail: ', where motion, type and the last ten percent decide whether a product feels considered.',
+    sub: 'Design tokens down to GLSL. The background on this page is generative too; the Design Eng page shows how it is made.',
+  },
+  {
+    label: 'Developers',
+    lead: 'I decide ',
+    mark: 'service boundaries and failure modes',
+    tail: ' before the code is written, then keep the feedback loop around it fast.',
+    sub: 'Realtime with WebSockets and WebRTC, typed APIs, one-command setups, and the agent tooling around a codebase.',
+  },
+  {
+    label: 'Founders',
+    lead: 'I take a product from ',
+    mark: 'idea to the App Store',
+    tail: ', and make the scoping calls about what ships first and what waits.',
+    sub: 'Rojar, Heala, Bookaleap and juju are live today. I can carry the whole stack or slot into a team.',
+  },
+  { label: 'Machines', lead: '', mark: '', tail: '', sub: '' },
+];
+
+const machineReadable = {
+  name: 'Francis Ijenebe',
+  role: 'Product & DevX Engineer',
+  disciplines: disciplines.map((d) => d.title),
+  shipped: projects.filter((p) => p.isLive).map((p) => p.title),
+  stack: ['Flutter', 'React Native', 'React', 'TypeScript', 'Node.js', 'WebRTC', 'GLSL'],
+  contact: 'ijenebefrancis@gmail.com',
+  github: 'https://github.com/FrancisIje',
+};
+
+// One key per line with arrays kept inline, so it fits the hero
+const machineJson = `{\n${Object.entries(machineReadable)
+  .map(([key, value]) => `  "${key}": ${JSON.stringify(value).replace(/","/g, '", "')}`)
+  .join(',\n')}\n}`;
+
+export default function Portfolio() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useStaggerReveal(rootRef, '/');
 
   return (
-    <div className="relative w-full flex items-center justify-center">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg className="loader" width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-            {/* Outer rotating hexagon */}
-            <polygon 
-              className="loader-hex-outer" 
-              points="60,10 95,32.5 95,77.5 60,100 25,77.5 25,32.5" 
-              fill="none" 
-              stroke="rgba(255,255,255,0.2)" 
-              strokeWidth="2"
-            />
-            
-            {/* Middle rotating triangle */}
-            <polygon 
-              className="loader-triangle" 
-              points="60,35 80,70 40,70" 
-              fill="none" 
-              stroke="rgba(255,255,255,0.4)" 
-              strokeWidth="2"
-            />
-            
-            {/* Inner pulsing circle */}
-            <circle 
-              className="loader-circle-inner" 
-              cx="60" 
-              cy="60" 
-              r="8" 
-              fill="rgba(255,255,255,0.6)"
-            />
-            
-            {/* Animated dots around */}
-            <circle className="loader-dot loader-dot-1" cx="60" cy="20" r="3" fill="rgba(255,255,255,0.8)" />
-            <circle className="loader-dot loader-dot-2" cx="88" cy="40" r="3" fill="rgba(255,255,255,0.8)" />
-            <circle className="loader-dot loader-dot-3" cx="88" cy="80" r="3" fill="rgba(255,255,255,0.8)" />
-            <circle className="loader-dot loader-dot-4" cx="60" cy="100" r="3" fill="rgba(255,255,255,0.8)" />
-            <circle className="loader-dot loader-dot-5" cx="32" cy="80" r="3" fill="rgba(255,255,255,0.8)" />
-            <circle className="loader-dot loader-dot-6" cx="32" cy="40" r="3" fill="rgba(255,255,255,0.8)" />
-          </svg>
-        </div>
-      )}
-      <img
-        src={src}
-        alt={alt}
-        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
-        onLoad={handleLoad}
-        onError={() => {
-          setIsLoading(false);
-          setHasError(true);
-        }}
-      />
-      {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center text-white/50">
-          <span>Image failed to load</span>
-        </div>
-      )}
+    <div ref={rootRef} className="min-h-screen text-ink relative overflow-x-hidden">
+      <div className="relative z-10">
+        <SiteHeader />
+
+        <main className="max-w-6xl mx-auto px-5 md:px-8">
+          <Hero />
+          <SelectWork />
+          <Disciplines />
+        </main>
+
+        <SiteFooter />
+      </div>
     </div>
   );
 }
 
-export function ShaderBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+function Hero() {
+  const [active, setActive] = useState(0);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const audience = audiences[active];
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const gl = canvas.getContext('webgl');
-    if (!gl) return;
-
-    const setSize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-    };
-    setSize();
-    window.addEventListener('resize', setSize);
-
-    const vertexShaderSource = `
-      attribute vec2 position;
-      void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-      }
-    `;
-
-    const fragmentShaderSource = `
-      precision highp float;
-      uniform float u_time;
-      uniform vec2 u_resolution;
-      uniform vec2 u_mouse;
-
-      // Noise function for organic movement
-      float noise(vec2 p) {
-        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
-      }
-
-      float smoothNoise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        
-        float a = noise(i);
-        float b = noise(i + vec2(1.0, 0.0));
-        float c = noise(i + vec2(0.0, 1.0));
-        float d = noise(i + vec2(1.0, 1.0));
-        
-        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-      }
-
-      // Metaball/blob function
-      float metaball(vec2 p, vec2 center, float radius) {
-        float dist = length(p - center);
-        return radius / (dist * dist);
-      }
-
-      void main() {
-        vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-        vec2 p = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
-        
-        // Mouse position with smooth random movement when no mouse input
-        vec2 mousePos = u_mouse;
-        float autoMoveSpeed = 0.3;
-        vec2 autoMove = vec2(
-          sin(u_time * autoMoveSpeed + 1.5) * 0.3,
-          cos(u_time * autoMoveSpeed * 0.8) * 0.3
-        );
-        
-        // Blend between mouse and automatic movement
-        float mouseInfluence = length(u_mouse - vec2(0.5));
-        mouseInfluence = smoothstep(0.0, 0.1, mouseInfluence);
-        vec2 targetPos = mix(autoMove, (mousePos - 0.5) * 2.0, mouseInfluence);
-        
-        // Create multiple organic blobs
-        float blob = 0.0;
-        
-        // Main blob following target (reduced size)
-        blob += metaball(p, targetPos, 0.3);
-        
-        // Additional organic blobs with slow movement (also reduced)
-        blob += metaball(p, 
-          vec2(sin(u_time * 0.4) * 0.5, cos(u_time * 0.3) * 0.4),
-          0.15
-        );
-        
-        blob += metaball(p,
-          vec2(cos(u_time * 0.5 + 2.0) * 0.6, sin(u_time * 0.4 + 1.0) * 0.5),
-          0.12
-        );
-        
-        blob += metaball(p,
-          vec2(sin(u_time * 0.35 + 4.0) * 0.4, cos(u_time * 0.45 + 3.0) * 0.6),
-          0.1
-        );
-        
-        // Add noise for organic feel
-        float n = smoothNoise(p * 3.0 + u_time * 0.1);
-        blob += n * 0.1;
-        
-        // Create smooth falloff
-        float intensity = smoothstep(0.3, 1.5, blob);
-        
-        // Subtle color variation
-        vec3 color = vec3(intensity * 0.15);
-        
-        gl_FragColor = vec4(color, 1.0);
-      }
-    `;
-
-    function createShader(gl: WebGLRenderingContext, type: number, source: string) {
-      const shader = gl.createShader(type);
-      if (!shader) return null;
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-      }
-      return shader;
-    }
-
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-    if (!vertexShader || !fragmentShader) {
-      console.error('Failed to create shaders');
-      return;
-    }
-
-    const program = gl.createProgram();
-    if (!program) {
-      console.error('Failed to create program');
-      return;
-    }
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error(gl.getProgramInfoLog(program));
-      return;
-    }
-
-    gl.useProgram(program);
-
-    const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-    const positionLocation = gl.getAttribLocation(program, 'position');
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-    const timeLocation = gl.getUniformLocation(program, 'u_time');
-    const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-    const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
-
-    let mouseX = 0.5;
-    let mouseY = 0.5;
-    let lastMouseMove = Date.now();
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX / window.innerWidth;
-      mouseY = 1.0 - e.clientY / window.innerHeight;
-      lastMouseMove = Date.now();
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-
-    let startTime = Date.now();
-    // Arrow form (like setSize/handleMouseMove above) so the null guards on
-    // canvas and gl above still narrow inside this closure.
-    const render = () => {
-      const currentTime = (Date.now() - startTime) * 0.001;
-      
-      gl.useProgram(program);
-      
-      if (timeLocation !== null) {
-        gl.uniform1f(timeLocation, currentTime);
-      }
-      if (resolutionLocation !== null) {
-        gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
-      }
-      if (mouseLocation !== null) {
-        gl.uniform2f(mouseLocation, mouseX, mouseY);
-      }
-      
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      requestAnimationFrame(render);
-    };
-    render();
-
-    return () => {
-      window.removeEventListener('resize', setSize);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full" style={{ zIndex: 0 }} />;
-}
-
-export default function Portfolio() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
+  // Arrow keys move between tabs, as in any tablist
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const next = (active + (e.key === 'ArrowRight' ? 1 : audiences.length - 1)) % audiences.length;
+    setActive(next);
+    tabRefs.current[next]?.focus();
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-x-hidden" style={{ fontFamily: '"Inter", system-ui, -apple-system, sans-serif' }}>
-      <SiteBackground />
-
-      <div className="relative z-10">
-        <SiteHeader />
-
-        {/* Hero: the whole of the home page. Everything else lives on the
-            discipline pages, reachable from the rail and the strip. */}
-        <section id="home" className="min-h-screen flex flex-col items-center justify-center px-6 pt-28 pb-16">
-          <div className={`w-full max-w-5xl mx-auto px-5 text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <h1 className="text-[clamp(3rem,13vw,8.25rem)] font-bold mb-10 tracking-[-0.05em] leading-[0.9]" style={{ fontFamily: '"Space Grotesk", "Inter", system-ui, sans-serif' }}>
-              <AnimatedText text="Francis Ijenebe" stagger={60} />
-            </h1>
-            <div className="text-lg md:text-xl text-white/60 mb-10 uppercase tracking-[0.2em] leading-[1.6]">
-              <AnimatedText text="Product & Platform Engineer" delay={950} stagger={24} />
-            </div>
-            <p className="text-center text-xl md:text-2xl text-white/70 max-w-4xl mx-auto leading-[1.6]">
-              <AnimatedText
-                text="I design and ship software end to end: mobile apps, the interfaces around them, the backend architecture underneath, and the platform and tooling it all runs on."
-                delay={1600}
-                stagger={9}
-              />
-            </p>
-          </div>
-        </section>
+    <section className="pt-36 md:pt-44 pb-20 md:pb-28 grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] gap-10 md:gap-16">
+      <div className="stagger-item flex md:flex-col items-center md:items-start gap-5 md:gap-6">
+        <div className="relative shrink-0">
+          <img
+            src="/francis.jpg"
+            alt="Francis Ijenebe"
+            width={900}
+            height={900}
+            className="w-24 h-24 md:w-56 md:h-64 rounded-2xl object-cover object-[50%_30%] shadow-[0_18px_40px_-20px_rgba(25,25,28,0.45)] ring-1 ring-ink/10"
+          />
+          {/* A single glyph tile stuck to the corner like a sticker */}
+          <span className="absolute -right-3 -bottom-3 md:-right-4 md:-bottom-4 w-9 md:w-12 rotate-12 rounded-lg bg-paper p-1 shadow-sm ring-1 ring-ink/10">
+            <GlyphGrid cols={1} rows={1} gap={0.08} waveEvery={2400} className="w-full block" />
+          </span>
+        </div>
+        <div>
+          <p className="font-serif text-accent text-[34px] md:text-[40px] leading-none tracking-[-0.01em]">Francis Ijenebe</p>
+          <p className="mt-2 text-[15px] text-ink/55">Product &amp; DevX Engineer</p>
+        </div>
       </div>
+
+      <div>
+        <div
+          role="tablist"
+          aria-label="Who is reading"
+          onKeyDown={onKeyDown}
+          className="stagger-item flex flex-wrap gap-x-5 gap-y-2 mb-6 text-[14px]"
+        >
+          {audiences.map((a, i) => (
+            <button
+              key={a.label}
+              ref={(node) => { tabRefs.current[i] = node; }}
+              type="button"
+              role="tab"
+              id={`aud-tab-${i}`}
+              aria-selected={i === active}
+              aria-controls="aud-panel"
+              tabIndex={i === active ? 0 : -1}
+              onClick={() => setActive(i)}
+              className={`transition-colors ${i === active ? 'text-accent font-medium' : 'text-ink/45 hover:text-ink'}`}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
+
+        <div id="aud-panel" role="tabpanel" aria-labelledby={`aud-tab-${active}`} className="stagger-item min-h-[15rem] md:min-h-[17rem]">
+          {audience.label === 'Machines' ? (
+            <pre key="machines" className="swap-in font-mono text-[12px] md:text-[13px] leading-relaxed text-ink/80 bg-white/75 ring-1 ring-ink/10 rounded-xl p-5 whitespace-pre-wrap break-words">
+              {machineJson}
+            </pre>
+          ) : (
+            <div key={active} className="swap-in">
+              <h1 className="font-serif text-[clamp(2.1rem,4.2vw,3.1rem)] leading-[1.12] tracking-[-0.015em]">
+                {audience.lead}
+                <span className="mark">{audience.mark}</span>
+                <InlineGlyph />
+                {audience.tail}
+              </h1>
+              <p className="mt-6 text-[16px] md:text-[17px] leading-relaxed text-ink/60 max-w-xl">{audience.sub}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="stagger-item mt-8 flex flex-wrap items-center gap-3">
+          <CopyEmail />
+          <a
+            href="#work"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm text-ink/60 hover:text-ink transition-colors"
+          >
+            See the work <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// A glyph set into the line of type, the way the reference puts a little sun
+// in its headline. It keeps reshuffling, so the sentence never sits still.
+function InlineGlyph() {
+  return (
+    <span className="inline-block align-[-0.08em] w-[0.78em] mx-[0.12em]" aria-hidden="true">
+      <GlyphGrid cols={1} rows={1} gap={0} waveEvery={2000} className="w-full block" />
+    </span>
+  );
+}
+
+function SelectWork() {
+  return (
+    <section id="work" className="pb-24 scroll-mt-28">
+      <h2 className="stagger-item font-serif text-[32px] md:text-[36px] tracking-[-0.01em] mb-8">Select work</h2>
+      <div className="grid md:grid-cols-2 gap-x-6 gap-y-12">
+        {projects.map((project) => (
+          <ProjectCard key={project.title} project={project} />
+        ))}
+        <ThisSiteCard />
+      </div>
+    </section>
+  );
+}
+
+function ProjectCard({ project }: { project: Project }) {
+  const href = projectHref(project);
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`stagger-item group block ${project.featured ? 'md:col-span-2' : ''}`}
+    >
+      <div
+        className={`${project.featured ? 'aspect-[16/10] md:aspect-[2/1]' : 'aspect-[16/10]'} rounded-xl overflow-hidden ring-1 ring-ink/[0.06] flex items-center justify-center p-5 md:p-8`}
+        style={{ background: project.tint }}
+      >
+        <ImageWithLoader
+          src={project.image}
+          alt={`${project.title} screenshots`}
+          className="max-w-full max-h-full object-contain rounded-md transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.035]"
+        />
+      </div>
+      <CardCaption
+        title={project.title}
+        tagline={project.tagline}
+        badge={project.isLive ? 'Live' : project.year}
+      />
+    </a>
+  );
+}
+
+// The sixth tile is the site itself: the loader's glyph grid, running live.
+function ThisSiteCard() {
+  return (
+    <a href="/design-engineering" className="stagger-item group block">
+      <div className="aspect-[16/10] rounded-xl overflow-hidden ring-1 ring-ink/[0.06] bg-[#eceaf6] flex items-center justify-center p-6">
+        <GlyphGrid cols={8} rows={5} gap={0.3} waveEvery={1300} className="h-full max-w-full" label="Live generative glyph grid" />
+      </div>
+      <CardCaption
+        title="This site"
+        tagline="Generative background and loader after Okazz, in plain Canvas 2D."
+        badge="2026"
+        internal
+      />
+    </a>
+  );
+}
+
+function CardCaption({ title, tagline, badge, internal = false }: {
+  title: string;
+  tagline: string;
+  badge?: string;
+  internal?: boolean;
+}) {
+  return (
+    <div className="mt-4 flex items-start justify-between gap-4">
+      <div>
+        <h3 className="text-[15px] font-medium flex items-center gap-2">
+          {title}
+          {!internal && <span className="sr-only">(opens in a new tab)</span>}
+          {badge && (
+            <span className={`text-[11px] px-2 py-0.5 rounded-full ${
+              badge === 'Live' ? 'bg-green-500/10 text-green-700' : 'bg-ink/[0.05] text-ink/50'
+            }`}>
+              {badge}
+            </span>
+          )}
+        </h3>
+        <p className="mt-1 text-[14px] text-ink/55 leading-snug">{tagline}</p>
+      </div>
+      <ArrowUpRight
+        className="w-4 h-4 mt-1 shrink-0 text-ink/35 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+        aria-hidden="true"
+      />
     </div>
+  );
+}
+
+function Disciplines() {
+  return (
+    <section className="pb-24">
+      <h2 className="stagger-item font-serif text-[32px] md:text-[36px] tracking-[-0.01em] mb-3">What I do</h2>
+      <p className="stagger-item text-ink/55 max-w-xl mb-8">Four disciplines, one person. Each has its own page with the detail.</p>
+      <ul className="border-t border-ink/10">
+        {disciplines.map((d, idx) => (
+          <li key={d.slug} className="stagger-item border-b border-ink/10">
+            <a href={d.slug} className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] md:grid-cols-[3rem_16rem_minmax(0,1fr)_auto] items-baseline gap-x-4 py-5 md:py-6">
+              <span className="text-[12px] tabular-nums text-ink/35">{String(idx + 1).padStart(2, '0')}</span>
+              <span className="font-serif text-[24px] md:text-[28px] leading-tight group-hover:text-accent transition-colors">{d.title}</span>
+              <span className="hidden md:block text-[15px] text-ink/55">{d.blurb}</span>
+              <ArrowUpRight className="w-4 h-4 text-ink/35 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+              <span className="md:hidden col-start-2 col-span-2 mt-1 text-[14px] text-ink/55">{d.blurb}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

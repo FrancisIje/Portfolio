@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bot, Plug, Terminal, Zap, GitBranch, ShieldCheck, BookOpen, Workflow } from 'lucide-react';
-import PageShell, { Section, SkillGroups, CardGrid } from '../components/PageShell';
+import PageShell, { Section, SkillGroups, CardGrid, ProjectFeatures } from '../components/PageShell';
+import { projectsFor } from '../data/projects';
 
 const approach = [
   {
@@ -88,6 +89,13 @@ export default function DevX() {
       intro="The tooling engineers spend all day inside: AI in the workflow, agent infrastructure, internal tools and the build, test and release loops around them. Measured in how fast the loop closes."
       tags={["AI Tooling", "MCP", "Agents", "Automation", "CI/CD", "Internal Tools"]}
     >
+      <Section
+        eyebrow="Selected Work"
+        heading="Shipped and in use"
+      >
+        <ProjectFeatures projects={projectsFor('/devx')} slug="/devx" />
+      </Section>
+
       <Section
         eyebrow="Approach"
         heading="Where the field is expanding"

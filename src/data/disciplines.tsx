@@ -1,4 +1,4 @@
-import { Palette, Smartphone, Server, Layers, Terminal } from 'lucide-react';
+import { Palette, Smartphone, Server, Terminal } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type Discipline = {
@@ -10,7 +10,7 @@ export type Discipline = {
   blurb: string;
 };
 
-// Single source of truth for the five discipline pages. Drives the home page
+// Single source of truth for the discipline pages. Drives the home page
 // nav grid, the cross-page switcher in PageShell, and each page's background hue.
 export const disciplines: Discipline[] = [
   {
@@ -38,14 +38,6 @@ export const disciplines: Discipline[] = [
     blurb: 'Service boundaries, data models and failure modes, decided before the code is written.',
   },
   {
-    slug: '/platform-engineering',
-    hue: 190,
-    icon: Layers,
-    label: 'Platform Eng',
-    title: 'Platform Engineering',
-    blurb: 'The cloud, network and delivery layer other engineers build on, across GCP and Azure.',
-  },
-  {
     slug: '/devx',
     hue: 40,
     icon: Terminal,
@@ -60,6 +52,8 @@ export const disciplines: Discipline[] = [
 export const legacyRedirects: Record<string, string> = {
   '/frontend': '/design-engineering',
   '/webgl': '/design-engineering',
-  '/infrastructure': '/platform-engineering',
+  // Platform Engineering was retired outright; its old links land on the home page
+  '/platform-engineering': '/',
+  '/infrastructure': '/',
   '/gtm-engineering': '/devx',
 };
